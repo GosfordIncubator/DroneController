@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Drone Wars", "Drone Wars\Drone Wars.csproj", "{56232FF3-9AD8-4A08-A1B7-57D87A5AD20E}"
+EndProject
+Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "NodeServer", "NodeServer\NodeServer.njsproj", "{62BF080C-BD6F-43C1-B1EE-73AAF6BD7563}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{56232FF3-9AD8-4A08-A1B7-57D87A5AD20E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{56232FF3-9AD8-4A08-A1B7-57D87A5AD20E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{56232FF3-9AD8-4A08-A1B7-57D87A5AD20E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{56232FF3-9AD8-4A08-A1B7-57D87A5AD20E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62BF080C-BD6F-43C1-B1EE-73AAF6BD7563}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62BF080C-BD6F-43C1-B1EE-73AAF6BD7563}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62BF080C-BD6F-43C1-B1EE-73AAF6BD7563}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62BF080C-BD6F-43C1-B1EE-73AAF6BD7563}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
