@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using System.Text;
 using System.Threading;
+using DroneControl;
 
 namespace Drone_Wars.Model
 {
@@ -12,72 +13,82 @@ namespace Drone_Wars.Model
         static NetworkStream serverStream = default(NetworkStream);
         static string readData = string.Empty;
 
-        private static void sendMessage(string message)
+        private static void sendMessage(int message, int id)
         {
-            byte[] outStream = Encoding.ASCII.GetBytes(message);
+            string idS = "" + id;
+            if (id < 10) idS = "0" + id;
+            //byte[] outStream = Encoding.ASCII.GetBytes(message + idS);
+            byte[] outStream = new byte[2];
+            outStream[0] = (byte)message;
+            outStream[1] = (byte)id;
             serverStream.Write(outStream, 0, outStream.Length);
             serverStream.Flush();
         }
 
-        public static void sendTakeOff()
+        public static void sendTakeOff(int id)
         {
-            sendMessage("1");
+            sendMessage(1, id);
         }
 
-        public static void sendLand()
+        public static void sendLand(int id)
         {
             Console.WriteLine("Landing");
-            sendMessage("2");
+            sendMessage(2, id);
         }
 
-        public static void sendStop()
+        public static void sendStop(int id)
         {
-            sendMessage("3");
+            sendMessage(3, id);
         }
 
-        public static void sendStopX()
+        public static void sendStopX(int id)
         {
-            sendMessage("31");
+            sendMessage(31, id);
         }
 
-        public static void sendStopY()
+        public static void sendStopY(int id)
         {
-            sendMessage("32");
+            sendMessage(32, id);
         }
         
-        public static void sendStopZ()
+        public static void sendStopZ(int id)
         {
-            sendMessage("33");
+            sendMessage(33, id);
         }
 
-        public static void sendForward()
+        public static void sendForward(int id)
         {
-            sendMessage("4");
+            sendMessage(4, id);
         }
 
-        public static void sendBackward()
+        public static void sendBackward(int id)
         {
-            sendMessage("5");
+            sendMessage(5, id);
         }
 
-        public static void sendLeft()
+        public static void sendLeft(int id)
         {
-            sendMessage("6");
+            sendMessage(6, id);
         }
 
-        public static void sendRight()
+        public static void sendRight(int id)
         {
-            sendMessage("7");
+            sendMessage(7, id);
         }
 
-        public static void sendUp()
+        public static void sendUp(int id)
         {
-            sendMessage("8");
+            sendMessage(8, id);
         }
 
-        public static void sendDown()
+        public static void sendDown(int id)
         {
-            sendMessage("9");
+            sendMessage(9, id);
+        }
+
+        public static Position getDronePos(int id)
+        {
+            return null;
         }
 
         public static void connect()
@@ -85,7 +96,7 @@ namespace Drone_Wars.Model
             tcpClient.Connect("127.0.0.1", 8000);
             serverStream = tcpClient.GetStream();
 
-            sendMessage("0");
+            sendMessage(0,0);
 
             // upload as javascript blob
             Task taskOpenEndpoint = Task.Factory.StartNew(() =>

@@ -44,8 +44,21 @@ namespace DroneControl
         
         public void operate()
         {
+            //position = Network.getDronePos(id);
+
             if (inputLag == 0)
             {
+                if (futPos[0] != null)
+                {
+                    if (!futPos[0].equals(position))
+                    {
+                        Movement m = position.getPath(futPos[1]);
+                        cardinalCommand(m.xDirection, m.xDistance);
+                        cardinalCommand(m.yDirection, m.yDistance);
+                        cardinalCommand(m.zDirection, m.zDistance);
+                    }
+                }
+
                 if (yActionCount == 0 && !yAction.Equals("None"))
                 {
                     stopY();
@@ -146,7 +159,7 @@ namespace DroneControl
                         if (isSafeForward(position))
                         {
                             if (inputLag == 0) inputLag++;
-                            Network.sendForward();
+                            Network.sendForward(id);
                             yAction = action;
                             yActionCount = actionCount;
                         }
@@ -155,7 +168,7 @@ namespace DroneControl
                         if (isSafeBackward(position))
                         {
                             if (inputLag == 0) inputLag++;
-                            Network.sendBackward();
+                            Network.sendBackward(id);
                             yAction = action;
                             yActionCount = actionCount;
                         }
@@ -164,7 +177,7 @@ namespace DroneControl
                         if (isSafeLeft(position))
                         {
                             if (inputLag == 0) inputLag+=2;
-                            Network.sendLeft();
+                            Network.sendLeft(id);
                             xAction = action;
                             xActionCount = actionCount;
                         }
@@ -173,7 +186,7 @@ namespace DroneControl
                         if (isSafeRight(position))
                         {
                             if (inputLag == 0) inputLag+=2;
-                            Network.sendRight();
+                            Network.sendRight(id);
                             xAction = action;
                             xActionCount = actionCount;
                         }
@@ -182,7 +195,7 @@ namespace DroneControl
                         if (isSafeUp(position))
                         {
                             if (inputLag == 0) inputLag++;
-                            Network.sendUp();
+                            Network.sendUp(id);
                             zAction = action;
                             zActionCount = actionCount;
                         }
@@ -191,7 +204,7 @@ namespace DroneControl
                         if (isSafeDown(position))
                         {
                             if (inputLag == 0) inputLag++;
-                            Network.sendDown();
+                            Network.sendDown(id);
                             zAction = action;
                             zActionCount = actionCount;
                         }
@@ -205,6 +218,25 @@ namespace DroneControl
             else throw new LandedException();
         }
 
+        public void cardinalCommand(string action, int actionCount)
+        {
+            switch (action)
+            {
+                case "North":
+                    moveNorth(actionCount);
+                    break;
+                case "South":
+                    moveSouth(actionCount);
+                    break;
+                case "West":
+                    moveWest(actionCount);
+                    break;
+                case "East":
+                    moveEast(actionCount);
+                    break;
+            }
+        }
+
         public void takeOff()
         {
             if (getZPos() == 0 && landed == true)
@@ -212,7 +244,7 @@ namespace DroneControl
                 setZPos(1);
                 landed = false;
                 state = "flying";
-                Network.sendTakeOff();
+                Network.sendTakeOff(id);
             }
         }
 
@@ -220,7 +252,7 @@ namespace DroneControl
         {
             if (!landed)
             {
-                Network.sendLand();
+                Network.sendLand(id);
                 setZPos(0);
                 landed = true;
                 state = "landed";
@@ -230,7 +262,7 @@ namespace DroneControl
 
         public void stop()
         {
-            Network.sendStop();
+            Network.sendStop(id);
             xAction = "None";
             xActionCount = 0;
             yAction = "None";
@@ -241,21 +273,21 @@ namespace DroneControl
 
         private void stopX()
         {
-            Network.sendStopX();
+            Network.sendStopX(id);
             xAction = "None";
             xActionCount = 0;
         }
 
         private void stopY()
         {
-            Network.sendStopY();
+            Network.sendStopY(id);
             yAction = "None";
             yActionCount = 0;
         }
 
         private void stopZ()
         {
-            Network.sendStopZ();
+            Network.sendStopZ(id);
             zAction = "None";
             zActionCount = 0;
         }
@@ -428,6 +460,178 @@ namespace DroneControl
         private Position moveDown(Position position)
         {
             return new Position(position.getxPos(), position.getyPos(), position.getzPos() - 1);
+        }
+
+        private void moveNorth(int actionCount)
+        {
+            switch (orientation)
+            {
+                //Facing North
+                case 0:
+                    command("forward",actionCount);
+                    break;
+                //Facing North-East
+                case 1:
+                    rotateTo(0);
+                    command("forward", actionCount);
+                    break;
+                //Facing East
+                case 2:
+                    command("left", actionCount);
+                    break;
+                //Facing South-East
+                case 3:
+                    rotateTo(2);
+                    command("left", actionCount);
+                    break;
+                //Facing South
+                case 4:
+                    command("backward", actionCount);
+                    break;
+                //Facing South-West
+                case 5:
+                    rotateTo(4);
+                    command("backward", actionCount);
+                    break;
+                //Facing West
+                case 6:
+                    command("right", actionCount);
+                    break;
+                //Facing North-West
+                case 7:
+                    rotateTo(6);
+                    command("right", actionCount);
+                    break;
+            }
+        }
+
+        private void moveSouth(int actionCount)
+        {
+            switch (orientation)
+            {
+                //Facing North
+                case 0:
+                    command("backward", actionCount);
+                    break;
+                //Facing North-East
+                case 1:
+                    rotateTo(0);
+                    command("backward", actionCount);
+                    break;
+                //Facing East
+                case 2:
+                    command("right", actionCount);
+                    break;
+                //Facing South-East
+                case 3:
+                    rotateTo(2);
+                    command("right", actionCount);
+                    break;
+                //Facing South
+                case 4:
+                    command("forward", actionCount);
+                    break;
+                //Facing South-West
+                case 5:
+                    rotateTo(4);
+                    command("forward", actionCount);
+                    break;
+                //Facing West
+                case 6:
+                    command("left", actionCount);
+                    break;
+                //Facing North-West
+                case 7:
+                    rotateTo(6);
+                    command("left", actionCount);
+                    break;
+            }
+        }
+
+        private void moveEast(int actionCount)
+        {
+            switch (orientation)
+            {
+                //Facing North
+                case 0:
+                    command("right", actionCount);
+                    break;
+                //Facing North-East
+                case 1:
+                    rotateTo(0);
+                    command("right", actionCount);
+                    break;
+                //Facing East
+                case 2:
+                    command("forward", actionCount);
+                    break;
+                //Facing South-East
+                case 3:
+                    rotateTo(2);
+                    command("forward", actionCount);
+                    break;
+                //Facing South
+                case 4:
+                    command("left", actionCount);
+                    break;
+                //Facing South-West
+                case 5:
+                    rotateTo(4);
+                    command("left", actionCount);
+                    break;
+                //Facing West
+                case 6:
+                    command("backward", actionCount);
+                    break;
+                //Facing North-West
+                case 7:
+                    rotateTo(6);
+                    command("backward", actionCount);
+                    break;
+            }
+        }
+
+        private void moveWest(int actionCount)
+        {
+            switch (orientation)
+            {
+                //Facing North
+                case 0:
+                    command("left", actionCount);
+                    break;
+                //Facing North-East
+                case 1:
+                    rotateTo(0);
+                    command("left", actionCount);
+                    break;
+                //Facing East
+                case 2:
+                    command("backward", actionCount);
+                    break;
+                //Facing South-East
+                case 3:
+                    rotateTo(2);
+                    command("backward", actionCount);
+                    break;
+                //Facing South
+                case 4:
+                    command("right", actionCount);
+                    break;
+                //Facing South-West
+                case 5:
+                    rotateTo(4);
+                    command("right", actionCount);
+                    break;
+                //Facing West
+                case 6:
+                    command("forward", actionCount);
+                    break;
+                //Facing North-West
+                case 7:
+                    rotateTo(6);
+                    command("forward", actionCount);
+                    break;
+            }
         }
 
         private bool isSafeForward(Position position)
@@ -747,6 +951,11 @@ namespace DroneControl
                 }
             }
             return position;
+        }
+
+        private void rotateTo(int o)
+        {
+            orientation = o;
         }
 
         public int getXPos()
