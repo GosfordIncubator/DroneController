@@ -1,0 +1,2 @@
+C:\Users\Hayden\Google Drive\Gosford Software Incubator\Drone Wars\NodeServer\bin\Microsoft.NodejsTools.WebRole.dll
+C:\Users\Hayden\Google Drive\Gosford Software Incubator\Drone Wars\NodeServer\obj\Debug\NodeServer.njsprojResolveAssemblyReference.cache
