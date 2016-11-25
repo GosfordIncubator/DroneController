@@ -52,7 +52,7 @@ namespace DroneControl
                 {
                     if (!futPos[0].equals(position))
                     {
-                        Movement m = position.getPath(futPos[1]);
+                        Movement m = position.getPath(futPos[2]);
                         cardinalCommand(m.xDirection, m.xDistance);
                         cardinalCommand(m.yDirection, m.yDistance);
                         cardinalCommand(m.zDirection, m.zDistance);

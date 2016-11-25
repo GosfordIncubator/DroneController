@@ -4,6 +4,8 @@ var c = ar.createClient();
 c.createRepl();
 
 var socket;
+var drones = new Array();
+drones[drones.length] = new Drone();
 
 // Create a TCP socket listener
 var s = net.Server(function (client) {
@@ -20,6 +22,7 @@ var s = net.Server(function (client) {
         }
         if (msg == 1) {
             console.log('Drone takeoff');
+            sendInfo(id);
             c.takeoff();
         }
         if (msg == 2) {
@@ -81,4 +84,21 @@ function hex2a(hexx) {
     for (var i = 0; i < hex.length; i += 2)
         str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
     return str;
+}
+
+function sendInfo(id) {
+    var s = new Array();
+    s[0] = drones[id-1].id;
+    s[1] = drones[id - 1].x;
+    s[2] = drones[id - 1].y;
+    s[3] = drones[id - 1].z;
+    var b = new Buffer.from(s);
+    socket.write(b);
+}
+
+function Drone() {
+    this.id = 1;
+    this.x = 0;
+    this.y = 0;
+    this.z = 0;
 }

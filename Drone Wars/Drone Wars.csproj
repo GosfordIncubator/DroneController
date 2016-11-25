@@ -61,6 +61,7 @@
       <DependentUpon>DroneController.cs</DependentUpon>
     </Compile>
     <Compile Include="Model\LandedException.cs" />
+    <Compile Include="Model\LiteDrone.cs" />
     <Compile Include="Model\Movement.cs" />
     <Compile Include="Model\Network.cs" />
     <Compile Include="Model\OccupiedException.cs" />
