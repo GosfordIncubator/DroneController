@@ -8,7 +8,6 @@ namespace Drone_Wars
 {
     public partial class DroneController : Form
     {
-        Field field;
 
         public DroneController()
         {
@@ -17,32 +16,32 @@ namespace Drone_Wars
 
         private void DroneController_Load(object sender, EventArgs e)
         {
-
-            FieldSizeChooser fieldSizeChooser = new FieldSizeChooser();
-            if (fieldSizeChooser.ShowDialog() == DialogResult.OK)
+            FieldSizeChooser FieldSizeChooser = new FieldSizeChooser();
+            if (FieldSizeChooser.ShowDialog() == DialogResult.OK)
             {
                 Network.connect();
-                
-                field = new Field(fieldSizeChooser.X, fieldSizeChooser.Y, 5);
+                Network.connect2();
+
+                Field.setupField(FieldSizeChooser.X, FieldSizeChooser.Y, 5);
                 timer1.Enabled = true;
 
-                dronesLb.DataSource = field.getDrones();
+                dronesLb.DataSource = Field.getDrones();
                 mapGv.BackgroundColor = DroneController.DefaultBackColor;
 
-                for (int x = 0; x < field.getFieldLengthX(); x++)
+                for (int x = 0; x < Field.getFieldLengthX(); x++)
                 {
                     DataGridViewImageColumn imageCol = new DataGridViewImageColumn();
                     mapGv.Columns.Add(imageCol);
                 }
 
-                for (int y = 0; y < field.getFieldLengthY() - 1; y++)
+                for (int y = 0; y < Field.getFieldLengthY() - 1; y++)
                 {
                     mapGv.Rows.Add();
                 }
 
-                for (int x = 0; x < field.getFieldLengthX(); x++)
+                for (int x = 0; x < Field.getFieldLengthX(); x++)
                 {
-                    for (int y = 0; y < field.getFieldLengthY(); y++)
+                    for (int y = 0; y < Field.getFieldLengthY(); y++)
                     {
                         mapGv.Rows[y].Cells[x].Value = new Bitmap(Properties.Resources.empty);
                     }
@@ -72,12 +71,12 @@ namespace Drone_Wars
 
         private void addDroneBtn_Click(object sender, EventArgs e)
         {
-            if (!field.isOccupied(new Position(0, 0, 0)))
+            if (!Field.isOccupied(new Position(0, 0, 0)))
             {
                 int ip = getIp();
-                if (ip > 1 && !field.ipExists(ip))
+                if (ip > 1 && !Field.ipExists(ip))
                 {
-                    Drone drone = field.newDrone(0, 0, 0, ip);
+                    Drone drone = Field.newDrone(0, 0, 0, ip);
                 }
                 else MessageBox.Show("Invalid IP", "Error");
             }
@@ -87,7 +86,7 @@ namespace Drone_Wars
         private void removeDroneBtn_Click(object sender, EventArgs e)
         {
             Drone drone = getSelectedDrone();
-            field.removeDrone(drone);
+            Field.removeDrone(drone);
         }
 
         private void flyBtn_Click(object sender, EventArgs e)
@@ -212,7 +211,7 @@ namespace Drone_Wars
 
         public void operate()
         {
-            foreach (Drone drone in field.getDrones())
+            foreach (Drone drone in Field.getDrones())
             {
                 foreach (Position p in drone.getFutPos())
                 {
@@ -228,7 +227,7 @@ namespace Drone_Wars
                     {
                         if (p != null)
                         {
-                            if (!field.isOccupied(p) && p.isInside(field.getFieldLengthX(),field.getFieldLengthY(),field.getMaxHeight()))
+                            if (!Field.isOccupied(p) && p.isInside(Field.getFieldLengthX(),Field.getFieldLengthY(),Field.getMaxHeight()))
                             {
                                 setDroneSquare(p, "prediction");
                             }

@@ -3,31 +3,31 @@ using System.ComponentModel;
 
 namespace DroneControl
 {
-    class Field
+    static class Field
     {
-        private BindingList<Drone> drones = new BindingList<Drone>();
-        private int fieldLengthX;
-        private int fieldLengthY;
-        private int maxHeight;
+        private static BindingList<Drone> drones = new BindingList<Drone>();
+        private static int fieldLengthX;
+        private static int fieldLengthY;
+        private static int maxHeight;
 
-        private int droneNumber = 0;
+        private static int droneNumber = 0;
 
-        public Field(int fieldLengthX, int fieldLengthY, int maxHeight)
+        public static void setupField(int x, int y, int z)
         {
-            this.fieldLengthX = fieldLengthX;
-            this.fieldLengthY = fieldLengthY;
-            this.maxHeight = maxHeight;
+            fieldLengthX = x;
+            fieldLengthY = y;
+            maxHeight = z;
         }
 
-        public Drone newDrone(int x, int y, int o, int ip)
+        public static Drone newDrone(int x, int y, int o, int ip)
         {
             droneNumber++;
-            Drone drone = new Drone(droneNumber, x, y, o, fieldLengthX, fieldLengthY, maxHeight, this, ip);
+            Drone drone = new Drone(droneNumber, x, y, o, fieldLengthX, fieldLengthY, maxHeight, ip);
             drones.Add(drone);
             return drone;
         }
 
-        public bool ipExists(int ip)
+        public static bool ipExists(int ip)
         {
             foreach (Drone drone in drones)
             {
@@ -36,17 +36,19 @@ namespace DroneControl
             return false;
         }
 
-        public void removeDrone(Drone drone)
+        public static void removeDrone(Drone drone)
         {
             drones.Remove(drone);
         }
 
-        public void deleteDrone(Drone drone)
+        public static void deleteDrone(Drone drone)
         {
+            drone.stop();
+            drone.land();
             drones.Remove(drone);
         }
 
-        public bool isOccupied(Position position)
+        public static bool isOccupied(Position position)
         {
             foreach (Drone drone in drones)
             {
@@ -58,7 +60,7 @@ namespace DroneControl
             return false;
         }
 
-        public bool crossesPath(Drone user, Position position)
+        public static bool crossesPath(Drone user, Position position)
         {
             List<Drone> f = new List<Drone>();
             f.AddRange(drones);
@@ -79,24 +81,33 @@ namespace DroneControl
             return false;
         }
 
-        public int getFieldLengthX()
+        public static int getFieldLengthX()
         {
             return fieldLengthX;
         }
 
-        public int getFieldLengthY()
+        public static int getFieldLengthY()
         {
             return fieldLengthY;
         }
 
-        public int getMaxHeight()
+        public static int getMaxHeight()
         {
             return maxHeight;
         }
 
-        public BindingList<Drone> getDrones()
+        public static BindingList<Drone> getDrones()
         {
             return drones;
+        }
+
+        public static Drone getDrone(int id)
+        {
+            foreach (Drone drone in drones)
+            {
+                if (drone.getId() == id) return drone;
+            }
+            return null;
         }
     }
 }

@@ -72,7 +72,7 @@ var s = net.Server(function (client) {
             drones[id].client.down(0.5);
         }
         if (msg == 10) {
-            drones[id] = new Drone(ip);
+            drones[id] = new Drone(ip, id);
         }
     });
 
@@ -93,11 +93,12 @@ function sendInfo(id) {
     socket.write(new Buffer.from(s));
 }
 
-function Drone(ip) {
+function Drone(ip, id) {
     var self = this;
 
     this.client = ar.createClient({'ip' : "192.168.1." + ip});
     this.ip = ip;
+    this.id = id;
 
     this.parallel = 0;
     this.transverse = 0;
@@ -135,6 +136,7 @@ function Drone(ip) {
             // self.position.x += localX;
             // self.position.y += localY;
         }
+        sendInfo(self.id);
     }
     this.client.on('navdata', this.updateData);
 

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using System.Text;
-using System.Threading;
 using DroneControl;
 using System.Net;
 using System.Collections.Generic;
@@ -11,7 +9,6 @@ namespace Drone_Wars.Model
 {
     static class Network
     {
-        static TcpClient tcp = new TcpClient();
         static NetworkStream stream = default(NetworkStream);
         static List<LiteDrone> drones = new List<LiteDrone>();
 
@@ -123,12 +120,13 @@ namespace Drone_Wars.Model
             }
             if (!found)
             {
-                drones.Add(new LiteDrone(id, x, y, z));
+                drones.Add(new LiteDrone(id, x, y, z, null));
             }
         }
 
         public static void connect()
         {
+            TcpClient tcp = new TcpClient();
             tcp.Connect("127.0.0.1", 8000);
             stream = tcp.GetStream();
 
@@ -149,10 +147,94 @@ namespace Drone_Wars.Model
                     {
                         Console.WriteLine("Network error");
                     }
-
-                    //We have read the message.
+                    
                     setDrone(message[0], message[1], message[2], message[3]);
-                    Thread.Sleep(500);
+                }
+            });
+        }
+
+        public static Movement getMovement(int id)
+        {
+            return getDrone(id).getM();
+        }
+
+        public static void setMovement(int id, Movement m)
+        {
+            getDrone(id).setM(m);
+        }
+
+        public static void connect2()
+        {
+            TcpClient phones;
+            Task taskOpenEndpoint = Task.Factory.StartNew(() =>
+            {
+                TcpListener l = new TcpListener(IPAddress.Any, 8001);
+                l.Start();
+
+                byte[] message = new byte[2];
+
+                while (true)
+                {
+                    Console.Write("Waiting for a phone connection... ");
+                    phones = l.AcceptTcpClient();
+                    Console.WriteLine("Phone found");
+
+                    NetworkStream s = phones.GetStream();
+                    s.Read(message, 0, 2);
+
+                    int id = message[0];
+                    int msg = message[1];
+                    Drone d = Field.getDrone(id);
+
+                    if (d != null)
+                    {
+                        if (msg == 1)
+                        {
+                            Console.WriteLine("Drone takeoff");
+                            d.takeOff();
+                        }
+                        if (msg == 2)
+                        {
+                            Console.WriteLine("Drone land");
+                            d.land();
+                        }
+                        if (msg == 3)
+                        {
+                            Console.WriteLine("Drone stop");
+                            d.stop();
+                        }
+                        if (msg == 4)
+                        {
+                            Console.WriteLine("Drone move forward");
+                            d.command("forward", 1);
+                        }
+                        if (msg == 5)
+                        {
+                            Console.WriteLine("Drone move backward");
+                            d.command("backward", 1);
+                        }
+                        if (msg == 6)
+                        {
+                            Console.WriteLine("Drone move left");
+                            d.command("left", 1);
+                        }
+                        if (msg == 7)
+                        {
+                            Console.WriteLine("Drone move right");
+                            d.command("right", 1);
+                        }
+                        if (msg == 8)
+                        {
+                            Console.WriteLine("Drone move up");
+                            d.command("up", 1);
+                        }
+                        if (msg == 9)
+                        {
+                            Console.WriteLine("Drone move down");
+                            d.command("down", 1);
+                        }
+                    }
+                    phones.Close();
                 }
             });
         }
