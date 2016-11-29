@@ -15,73 +15,79 @@ namespace Drone_Wars.Model
         static NetworkStream stream = default(NetworkStream);
         static List<LiteDrone> drones = new List<LiteDrone>();
 
-        private static void sendMessage(int message, int id)
+        private static void sendMessage(int message, int id, int ip)
         { 
-            byte[] outStream = new byte[2];
+            byte[] outStream = new byte[3];
             outStream[0] = (byte)message;
             outStream[1] = (byte)id;
+            outStream[2] = (byte)ip;
             stream.Write(outStream, 0, outStream.Length);
             stream.Flush();
         }
 
         public static void sendTakeOff(int id)
         {
-            sendMessage(1, id);
+            sendMessage(1, id, 0);
         }
 
         public static void sendLand(int id)
         {
-            sendMessage(2, id);
+            sendMessage(2, id, 0);
         }
 
         public static void sendStop(int id)
         {
-            sendMessage(3, id);
+            sendMessage(3, id, 0);
         }
 
         public static void sendStopX(int id)
         {
-            sendMessage(31, id);
+            sendMessage(31, id, 0);
         }
 
         public static void sendStopY(int id)
         {
-            sendMessage(32, id);
+            sendMessage(32, id, 0);
         }
         
         public static void sendStopZ(int id)
         {
-            sendMessage(33, id);
+            sendMessage(33, id, 0);
         }
 
         public static void sendForward(int id)
         {
-            sendMessage(4, id);
+            sendMessage(4, id, 0);
         }
 
         public static void sendBackward(int id)
         {
-            sendMessage(5, id);
+            sendMessage(5, id, 0);
         }
 
         public static void sendLeft(int id)
         {
-            sendMessage(6, id);
+            sendMessage(6, id, 0);
         }
 
         public static void sendRight(int id)
         {
-            sendMessage(7, id);
+            sendMessage(7, id, 0);
         }
 
         public static void sendUp(int id)
         {
-            sendMessage(8, id);
+            sendMessage(8, id, 0);
         }
 
         public static void sendDown(int id)
         {
-            sendMessage(9, id);
+            sendMessage(9, id, 0);
+        }
+
+        public static void sendNewDrone(int id, int ip)
+        {
+            sendMessage(10, id, ip);
         }
 
         public static Position getDronePos(int id)
@@ -126,7 +132,7 @@ namespace Drone_Wars.Model
             tcp.Connect("127.0.0.1", 8000);
             stream = tcp.GetStream();
 
-            sendMessage(0,0);
+            sendMessage(0,0,0);
 
             Task taskOpenEndpoint = Task.Factory.StartNew(() =>
             {

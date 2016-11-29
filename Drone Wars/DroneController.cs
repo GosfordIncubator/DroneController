@@ -74,7 +74,12 @@ namespace Drone_Wars
         {
             if (!field.isOccupied(new Position(0, 0, 0)))
             {
-                Drone drone = field.newDrone(0, 0, 0);
+                int ip = getIp();
+                if (ip > 1 && !field.ipExists(ip))
+                {
+                    Drone drone = field.newDrone(0, 0, 0, ip);
+                }
+                else MessageBox.Show("Invalid IP", "Error");
             }
             else MessageBox.Show("Cannot create drone, a drone already occupies starting space.", "Error");
         }
@@ -256,6 +261,14 @@ namespace Drone_Wars
             {
                 return 0;
             }
+        }
+
+        private int getIp()
+        {
+            int ip = Int32.Parse(ipTb.Text.Split('.')[3].Trim());
+            Console.WriteLine(ip);
+            ipTb.Text = "192.168.1.";
+            return ip;
         }
     }
 }

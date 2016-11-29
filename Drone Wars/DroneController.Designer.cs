@@ -44,13 +44,14 @@
             this.landBtn = new System.Windows.Forms.Button();
             this.mapGv = new System.Windows.Forms.DataGridView();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.ipTb = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.mapGv)).BeginInit();
             this.SuspendLayout();
             // 
             // dronesLb
             // 
             this.dronesLb.FormattingEnabled = true;
-            this.dronesLb.Location = new System.Drawing.Point(12, 32);
+            this.dronesLb.Location = new System.Drawing.Point(12, 61);
             this.dronesLb.Name = "dronesLb";
             this.dronesLb.Size = new System.Drawing.Size(184, 95);
             this.dronesLb.TabIndex = 0;
@@ -67,7 +68,7 @@
             // 
             // removeDroneBtn
             // 
-            this.removeDroneBtn.Location = new System.Drawing.Point(107, 3);
+            this.removeDroneBtn.Location = new System.Drawing.Point(12, 162);
             this.removeDroneBtn.Name = "removeDroneBtn";
             this.removeDroneBtn.Size = new System.Drawing.Size(89, 23);
             this.removeDroneBtn.TabIndex = 2;
@@ -77,7 +78,7 @@
             // 
             // forwardBtn
             // 
-            this.forwardBtn.Location = new System.Drawing.Point(41, 165);
+            this.forwardBtn.Location = new System.Drawing.Point(41, 223);
             this.forwardBtn.Name = "forwardBtn";
             this.forwardBtn.Size = new System.Drawing.Size(23, 23);
             this.forwardBtn.TabIndex = 3;
@@ -87,7 +88,7 @@
             // 
             // leftBtn
             // 
-            this.leftBtn.Location = new System.Drawing.Point(12, 194);
+            this.leftBtn.Location = new System.Drawing.Point(12, 252);
             this.leftBtn.Name = "leftBtn";
             this.leftBtn.Size = new System.Drawing.Size(23, 23);
             this.leftBtn.TabIndex = 4;
@@ -97,7 +98,7 @@
             // 
             // backwardsBtn
             // 
-            this.backwardsBtn.Location = new System.Drawing.Point(41, 194);
+            this.backwardsBtn.Location = new System.Drawing.Point(41, 252);
             this.backwardsBtn.Name = "backwardsBtn";
             this.backwardsBtn.Size = new System.Drawing.Size(23, 23);
             this.backwardsBtn.TabIndex = 5;
@@ -107,7 +108,7 @@
             // 
             // rightBtn
             // 
-            this.rightBtn.Location = new System.Drawing.Point(70, 194);
+            this.rightBtn.Location = new System.Drawing.Point(70, 252);
             this.rightBtn.Name = "rightBtn";
             this.rightBtn.Size = new System.Drawing.Size(23, 23);
             this.rightBtn.TabIndex = 6;
@@ -117,7 +118,7 @@
             // 
             // upBtn
             // 
-            this.upBtn.Location = new System.Drawing.Point(99, 165);
+            this.upBtn.Location = new System.Drawing.Point(99, 223);
             this.upBtn.Name = "upBtn";
             this.upBtn.Size = new System.Drawing.Size(23, 23);
             this.upBtn.TabIndex = 7;
@@ -127,7 +128,7 @@
             // 
             // downBtn
             // 
-            this.downBtn.Location = new System.Drawing.Point(99, 194);
+            this.downBtn.Location = new System.Drawing.Point(99, 252);
             this.downBtn.Name = "downBtn";
             this.downBtn.Size = new System.Drawing.Size(23, 23);
             this.downBtn.TabIndex = 8;
@@ -137,7 +138,7 @@
             // 
             // stopBtn
             // 
-            this.stopBtn.Location = new System.Drawing.Point(128, 194);
+            this.stopBtn.Location = new System.Drawing.Point(128, 252);
             this.stopBtn.Name = "stopBtn";
             this.stopBtn.Size = new System.Drawing.Size(40, 23);
             this.stopBtn.TabIndex = 9;
@@ -147,14 +148,14 @@
             // 
             // numberTb
             // 
-            this.numberTb.Location = new System.Drawing.Point(12, 223);
+            this.numberTb.Location = new System.Drawing.Point(12, 281);
             this.numberTb.Name = "numberTb";
             this.numberTb.Size = new System.Drawing.Size(81, 20);
             this.numberTb.TabIndex = 10;
             // 
             // flyBtn
             // 
-            this.flyBtn.Location = new System.Drawing.Point(12, 133);
+            this.flyBtn.Location = new System.Drawing.Point(12, 191);
             this.flyBtn.Name = "flyBtn";
             this.flyBtn.Size = new System.Drawing.Size(75, 23);
             this.flyBtn.TabIndex = 11;
@@ -164,7 +165,7 @@
             // 
             // landBtn
             // 
-            this.landBtn.Location = new System.Drawing.Point(121, 133);
+            this.landBtn.Location = new System.Drawing.Point(121, 191);
             this.landBtn.Name = "landBtn";
             this.landBtn.Size = new System.Drawing.Size(75, 23);
             this.landBtn.TabIndex = 12;
@@ -192,13 +193,22 @@
             this.timer1.Interval = 500;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // ipTb
+            // 
+            this.ipTb.Location = new System.Drawing.Point(12, 32);
+            this.ipTb.Name = "ipTb";
+            this.ipTb.Size = new System.Drawing.Size(184, 20);
+            this.ipTb.TabIndex = 14;
+            this.ipTb.Text = "192.168.1.";
+            // 
             // DroneController
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(390, 257);
+            this.ClientSize = new System.Drawing.Size(390, 308);
+            this.Controls.Add(this.ipTb);
             this.Controls.Add(this.mapGv);
             this.Controls.Add(this.landBtn);
             this.Controls.Add(this.flyBtn);
@@ -239,6 +249,7 @@
         private System.Windows.Forms.Button landBtn;
         private System.Windows.Forms.DataGridView mapGv;
         private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.TextBox ipTb;
     }
 }
 

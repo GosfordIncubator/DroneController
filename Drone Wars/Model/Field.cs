@@ -19,12 +19,21 @@ namespace DroneControl
             this.maxHeight = maxHeight;
         }
 
-        public Drone newDrone(int x, int y, int o)
+        public Drone newDrone(int x, int y, int o, int ip)
         {
             droneNumber++;
-            Drone drone = new Drone(droneNumber, x, y, o, fieldLengthX, fieldLengthY, maxHeight, this);
+            Drone drone = new Drone(droneNumber, x, y, o, fieldLengthX, fieldLengthY, maxHeight, this, ip);
             drones.Add(drone);
             return drone;
+        }
+
+        public bool ipExists(int ip)
+        {
+            foreach (Drone drone in drones)
+            {
+                if (drone.getIp() == ip) return true;
+            }
+            return false;
         }
 
         public void removeDrone(Drone drone)

@@ -18,6 +18,7 @@ namespace DroneControl
         private int fieldLengthY;
         private int maxHeight;
         private int orientation;
+        private int ip;
 
         private string xAction = "None";
         private string yAction = "None";
@@ -27,7 +28,7 @@ namespace DroneControl
         private int yActionCount = 0;
         private int zActionCount = 0;
 
-        public Drone(int id, int xPos, int yPos, int orientation, int fieldLengthX, int fieldLengthY, int maxHeight, Field field)
+        public Drone(int id, int xPos, int yPos, int orientation, int fieldLengthX, int fieldLengthY, int maxHeight, Field field, int ip)
         {
             this.id = id;
             setXPos(xPos);
@@ -40,6 +41,8 @@ namespace DroneControl
             this.field = field;
             landed = true;
             state = "landed";
+            this.ip = ip;
+            Network.sendNewDrone(id, ip);
         }
         
         public void operate()
@@ -1026,6 +1029,11 @@ namespace DroneControl
         public Position[] getFutPos()
         {
             return futPos;
+        }
+
+        public int getIp()
+        {
+            return ip;
         }
 
         override
