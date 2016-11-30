@@ -22,8 +22,11 @@ namespace DroneControl
             return false;
         }
 
-        public bool isInside(int x, int y, int z)
+        public bool isInside()
         {
+            int x = Field.getFieldLengthX();
+            int y = Field.getFieldLengthY();
+            int z = Field.getMaxHeight();
             if (xPos < 0) return false;
             if (xPos > x-1) return false;
             if (yPos < 0) return false;

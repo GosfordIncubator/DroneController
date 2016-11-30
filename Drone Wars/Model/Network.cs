@@ -127,7 +127,7 @@ namespace Drone_Wars.Model
         public static void connect()
         {
             TcpClient tcp = new TcpClient();
-            tcp.Connect("127.0.0.1", 8000);
+            tcp.Connect("localhost", 8000);
             stream = tcp.GetStream();
 
             sendMessage(0,0,0);
@@ -175,7 +175,7 @@ namespace Drone_Wars.Model
 
                 while (true)
                 {
-                    Console.Write("Waiting for a phone connection... ");
+                    Console.WriteLine("Waiting for a phone connection...");
                     phones = l.AcceptTcpClient();
                     Console.WriteLine("Phone found");
 

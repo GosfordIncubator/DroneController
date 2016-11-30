@@ -4,7 +4,6 @@ var ar = require('ar-drone');
 var socket;
 var drones = new Array();
 
-// Create a TCP socket listener
 var s = net.Server(function (client) {
 
     socket = client;

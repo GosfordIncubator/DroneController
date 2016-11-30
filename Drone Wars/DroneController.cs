@@ -3,11 +3,13 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using Drone_Wars.Model;
+using System.Threading.Tasks;
 
 namespace Drone_Wars
 {
     public partial class DroneController : Form
     {
+        private int c = 0;
 
         public DroneController()
         {
@@ -28,40 +30,7 @@ namespace Drone_Wars
                 dronesLb.DataSource = Field.getDrones();
                 mapGv.BackgroundColor = DroneController.DefaultBackColor;
 
-                for (int x = 0; x < Field.getFieldLengthX(); x++)
-                {
-                    DataGridViewImageColumn imageCol = new DataGridViewImageColumn();
-                    mapGv.Columns.Add(imageCol);
-                }
-
-                for (int y = 0; y < Field.getFieldLengthY() - 1; y++)
-                {
-                    mapGv.Rows.Add();
-                }
-
-                for (int x = 0; x < Field.getFieldLengthX(); x++)
-                {
-                    for (int y = 0; y < Field.getFieldLengthY(); y++)
-                    {
-                        mapGv.Rows[y].Cells[x].Value = new Bitmap(Properties.Resources.empty);
-                    }
-                }
-                
-                int height = 0;
-                foreach (DataGridViewRow row in mapGv.Rows)
-                {
-                    height += row.Height;
-                }
-                height += mapGv.ColumnHeadersHeight;
-
-                int width = 0;
-                foreach (DataGridViewColumn col in mapGv.Columns)
-                {
-                    width += col.Width;
-                }
-                width += mapGv.RowHeadersWidth;
-
-                mapGv.ClientSize = new Size(width + 2, height + 2);
+                createMap();
             }
             else
             {
@@ -196,6 +165,7 @@ namespace Drone_Wars
 
         public void setEmptySquare(Position position)
         {
+            c++;
             mapGv.Rows[position.getyPos()].Cells[position.getxPos()].Value = new Bitmap(Properties.Resources.empty);
         }
 
@@ -213,21 +183,22 @@ namespace Drone_Wars
         {
             foreach (Drone drone in Field.getDrones())
             {
-                foreach (Position p in drone.getFutPos())
+                for (int i = 1; i < drone.getFutPos().Length; i++)
                 {
+                    Position p = drone.getFutPos()[i];
                     if (p != null) setEmptySquare(p);
                 }
-                setEmptySquare(drone.getPosition());
                 drone.operate();
                 setDroneSquare(drone.getPosition(), drone.getState());
 
                 if (!drone.getPosition().equals(drone.getFuturePos(1)))
                 {
-                    foreach (Position p in drone.getFutPos())
+                    for (int i = 1; i < drone.getFutPos().Length; i++)
                     {
+                        Position p = drone.getFutPos()[i];
                         if (p != null)
                         {
-                            if (!Field.isOccupied(p) && p.isInside(Field.getFieldLengthX(),Field.getFieldLengthY(),Field.getMaxHeight()))
+                            if (!Field.isOccupied(p) && p.isInside())
                             {
                                 setDroneSquare(p, "prediction");
                             }
@@ -235,6 +206,8 @@ namespace Drone_Wars
                     }
                 }
             }
+            Console.WriteLine(c);
+            c = 0;
         }
 
         private Drone getSelectedDrone()
@@ -264,10 +237,70 @@ namespace Drone_Wars
 
         private int getIp()
         {
-            int ip = Int32.Parse(ipTb.Text.Split('.')[3].Trim());
-            Console.WriteLine(ip);
+            int ip;
+            try
+            {
+                ip = Int32.Parse(ipTb.Text.Split('.')[3].Trim());
+            } catch (FormatException)
+            {
+                ip = 0;
+            }
             ipTb.Text = "192.168.1.";
             return ip;
+        }
+
+        private async void createMap()
+        {
+            var progress = new Progress<string>();
+            await Task.Factory.StartNew(() => SecondThreadConcern.LongWork(progress),
+                                        TaskCreationOptions.LongRunning);
+
+            for (int x = 0; x < Field.getFieldLengthX(); x++)
+            {
+                mapGv.Columns.Add(new DataGridViewImageColumn());
+            }
+
+            for (int y = 0; y < Field.getFieldLengthY() - 1; y++)
+            {
+                mapGv.Rows.Add();
+            }
+
+            for (int x = 0; x < Field.getFieldLengthX(); x++)
+            {
+                for (int y = 0; y < Field.getFieldLengthY(); y++)
+                {
+                    mapGv.Rows[y].Cells[x].Value = new Bitmap(Properties.Resources.empty);
+                }
+            }
+
+            int height = 0;
+            foreach (DataGridViewRow row in mapGv.Rows)
+            {
+                height += row.Height;
+            }
+            height += mapGv.ColumnHeadersHeight;
+
+            int width = 0;
+            foreach (DataGridViewColumn col in mapGv.Columns)
+            {
+                width += col.Width;
+            }
+            width += mapGv.RowHeadersWidth;
+
+            mapGv.ClientSize = new Size(width + 2, height + 2);
+        }
+
+        class SecondThreadConcern
+        {
+            public static void LongWork(IProgress<string> progress)
+            {
+                // Perform a long running work...
+                for (var i = 0; i < 10; i++)
+                {
+                    Task.Delay(500).Wait();
+                    progress.Report(i.ToString());
+                }
+            }
         }
     }
 }

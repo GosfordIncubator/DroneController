@@ -7,7 +7,7 @@ namespace DroneControl
     {
         private int id;
         private Position position = new Position(0, 0, 0);
-        private Position[] futPos = new Position[10];
+        private Position[] futPos = new Position[3];
         private bool landed;
         private string state;
 
@@ -49,15 +49,21 @@ namespace DroneControl
 
             if (inputLag == 0)
             {
-                if (futPos[0] != null)
+                if (futPos[1] != null)
                 {
-                    if (!futPos[0].equals(position))
+                    if (!futPos[1].equals(position))
                     {
-                        Movement m = position.getPath(futPos[2]);
+                        Console.WriteLine("Correcting");
+                        Movement m = position.getPath(futPos[1]);
                         cardinalCommand(m.xDirection, m.xDistance);
                         cardinalCommand(m.yDirection, m.yDistance);
                         cardinalCommand(m.zDirection, m.zDistance);
                     }
+                }
+
+                for (int i = 0; i < futPos.Length; i++)
+                {
+                    futPos[i] = getFuturePos(i);
                 }
 
                 if (yActionCount == 0 && !yAction.Equals("None"))
@@ -142,12 +148,6 @@ namespace DroneControl
                 }
             }
             else inputLag--;
-
-            
-            for (int i = 0; i < futPos.Length; i++)
-            {
-                futPos[i] = getFuturePos(i);
-            }
         }
 
         public void command(string action, int actionCount)
@@ -644,42 +644,42 @@ namespace DroneControl
                 case 0:
                     //North
                     p = new Position(position.getxPos(), position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this,p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this,p);
                 //Facing North-East
                 case 1:
                     //North-East
                     p = new Position(position.getxPos() + 1, position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing East
                 case 2:
                     //East
                     p = new Position(position.getxPos() + 1, position.getyPos(), position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing South-East
                 case 3:
                     //South-East
                     p = new Position(position.getxPos() + 1, position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing South
                 case 4:
                     //South
                     p = new Position(position.getxPos(), position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing South-West
                 case 5:
                     //South-West
                     p = new Position(position.getxPos() - 1, position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing West
                 case 6:
                     //West
                     p = new Position(position.getxPos() - 1, position.getyPos(), position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing North-West
                 case 7:
                     //North-West
                     p = new Position(position.getxPos() - 1, position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
             }
             return false;
         }
@@ -693,42 +693,42 @@ namespace DroneControl
                 case 0:
                     //South
                     p = new Position(position.getxPos(), position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing North-East
                 case 1:
                     //South-West
                     p = new Position(position.getxPos() - 1, position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing East
                 case 2:
                     //West
                     p = new Position(position.getxPos() - 1, position.getyPos(), position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing South-East
                 case 3:
                     //North-West
                     p = new Position(position.getxPos() - 1, position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing South
                 case 4:
                     //North
                     p = new Position(position.getxPos(), position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing South-West
                 case 5:
                     //North-East
                     p = new Position(position.getxPos() + 1, position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing West
                 case 6:
                     //East
                     p = new Position(position.getxPos() + 1, position.getyPos(), position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing North-West
                 case 7:
                     //South-East
                     p = new Position(position.getxPos() + 1, position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
             }
             return false;
         }
@@ -742,42 +742,42 @@ namespace DroneControl
                 case 0:
                     //West
                     p = new Position(position.getxPos() - 1, position.getyPos(), position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing North-East
                 case 1:
                     //North-West
                     p = new Position(position.getxPos() - 1, position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing East
                 case 2:
                     //North
                     p = new Position(position.getxPos(), position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing South-East
                 case 3:
                     //North-East
                     p = new Position(position.getxPos() + 1, position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing South
                 case 4:
                     //East
                     p = new Position(position.getxPos() + 1, position.getyPos(), position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing South-West
                 case 5:
                     //South-East
                     p = new Position(position.getxPos() + 1, position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing West
                 case 6:
                     //South
                     p = new Position(position.getxPos(), position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing North-West
                 case 7:
                     //South-West
                     p = new Position(position.getxPos() - 1, position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
             }
             return false;
         }
@@ -791,42 +791,42 @@ namespace DroneControl
                 case 0:
                     //East
                     p = new Position(position.getxPos() + 1, position.getyPos(), position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing North-East
                 case 1:
                     //South-East
                     p = new Position(position.getxPos() + 1, position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing East
                 case 2:
                     //South
                     p = new Position(position.getxPos(), position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing South-East
                 case 3:
                     //South-West
                     p = new Position(position.getxPos() - 1, position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing South
                 case 4:
                     //West
                     p = new Position(position.getxPos() - 1, position.getyPos(), position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing South-West
                 case 5:
                     //North-West
                     p = new Position(position.getxPos() - 1, position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing West
                 case 6:
                     //North
                     p = new Position(position.getxPos(), position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
                 //Facing North-West
                 case 7:
                     //North-East
                     p = new Position(position.getxPos() + 1, position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside(FieldLengthX, FieldLengthY, maxHeight) && !Field.crossesPath(this, p);
+                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
             }
             return false;
         }

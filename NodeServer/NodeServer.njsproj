@@ -12,7 +12,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>62bf080c-bd6f-43c1-b1ee-73aaf6bd7563</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>-.js</StartupFile>
+    <StartupFile>server.js</StartupFile>
     <StartWebBrowser>False</StartWebBrowser>
     <SearchPath>
     </SearchPath>
@@ -30,7 +30,7 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="-.js" />
+    <Compile Include="server.js" />
     <Compile Include="app.js" />
     <Content Include="package.json" />
   </ItemGroup>
