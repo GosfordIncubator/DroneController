@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using DroneControl;
 using System.Net;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Drone_Wars.Model
 {
@@ -185,6 +186,14 @@ namespace Drone_Wars.Model
                     int id = message[0];
                     int msg = message[1];
                     Drone d = Field.getDrone(id);
+
+                    Console.WriteLine(id);
+                    Console.WriteLine(msg);
+
+                    if (msg == 0)
+                    {
+                        Console.WriteLine("Connected");
+                    }
 
                     if (d != null)
                     {

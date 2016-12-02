@@ -36,12 +36,11 @@ C:\Users\Hayden\Google Drive\Gosford Software Incubator\Drone Wars - Correction 
 C:\Users\Hayden\Google Drive\Gosford Software Incubator\Drone Wars - Correction Branch\Drone Wars\bin\Debug\Drone Wars.exe
 C:\Users\Hayden\Google Drive\Gosford Software Incubator\Drone Wars - Correction Branch\Drone Wars\bin\Debug\Drone Wars.pdb
 C:\Users\Hayden\Google Drive\Gosford Software Incubator\DroneController\Drone Wars\bin\Debug\Drone Wars.exe.config
-C:\Users\Hayden\Google Drive\Gosford Software Incubator\DroneController\Drone Wars\obj\Debug\Drone Wars.exe
-C:\Users\Hayden\Google Drive\Gosford Software Incubator\DroneController\Drone Wars\obj\Debug\Drone Wars.pdb
 C:\Users\Hayden\Google Drive\Gosford Software Incubator\DroneController\Drone Wars\bin\Debug\Drone Wars.exe
 C:\Users\Hayden\Google Drive\Gosford Software Incubator\DroneController\Drone Wars\bin\Debug\Drone Wars.pdb
-C:\Users\Hayden\Google Drive\Gosford Software Incubator\DroneController\Drone Wars\obj\Debug\Drone Wars.csprojResolveAssemblyReference.cache
 C:\Users\Hayden\Google Drive\Gosford Software Incubator\DroneController\Drone Wars\obj\Debug\Drone_Wars.DroneController.resources
 C:\Users\Hayden\Google Drive\Gosford Software Incubator\DroneController\Drone Wars\obj\Debug\Drone_Wars.FieldSizeChooser.resources
 C:\Users\Hayden\Google Drive\Gosford Software Incubator\DroneController\Drone Wars\obj\Debug\Drone_Wars.Properties.Resources.resources
 C:\Users\Hayden\Google Drive\Gosford Software Incubator\DroneController\Drone Wars\obj\Debug\Drone Wars.csproj.GenerateResource.Cache
+C:\Users\Hayden\Google Drive\Gosford Software Incubator\DroneController\Drone Wars\obj\Debug\Drone Wars.exe
+C:\Users\Hayden\Google Drive\Gosford Software Incubator\DroneController\Drone Wars\obj\Debug\Drone Wars.pdb

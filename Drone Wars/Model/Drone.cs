@@ -7,7 +7,7 @@ namespace DroneControl
     {
         private int id;
         private Position position = new Position(0, 0, 0);
-        private Position[] futPos = new Position[3];
+        private Position[] futPos = new Position[10];
         private bool landed;
         private string state;
 

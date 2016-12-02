@@ -9,7 +9,6 @@ namespace Drone_Wars
 {
     public partial class DroneController : Form
     {
-        private int c = 0;
 
         public DroneController()
         {
@@ -165,7 +164,6 @@ namespace Drone_Wars
 
         public void setEmptySquare(Position position)
         {
-            c++;
             mapGv.Rows[position.getyPos()].Cells[position.getxPos()].Value = new Bitmap(Properties.Resources.empty);
         }
 
@@ -183,17 +181,18 @@ namespace Drone_Wars
         {
             foreach (Drone drone in Field.getDrones())
             {
-                for (int i = 1; i < drone.getFutPos().Length; i++)
+                setEmptySquare(drone.getPosition());
+                for (int i = 2; i < 3; i++)
                 {
                     Position p = drone.getFutPos()[i];
-                    if (p != null) setEmptySquare(p);
+                    if (p != null &&!p.equals(drone.getPosition())) setEmptySquare(p);
                 }
                 drone.operate();
                 setDroneSquare(drone.getPosition(), drone.getState());
 
                 if (!drone.getPosition().equals(drone.getFuturePos(1)))
                 {
-                    for (int i = 1; i < drone.getFutPos().Length; i++)
+                    for (int i = 1; i < 3; i++)
                     {
                         Position p = drone.getFutPos()[i];
                         if (p != null)
@@ -206,8 +205,6 @@ namespace Drone_Wars
                     }
                 }
             }
-            Console.WriteLine(c);
-            c = 0;
         }
 
         private Drone getSelectedDrone()
