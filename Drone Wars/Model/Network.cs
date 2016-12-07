@@ -5,12 +5,13 @@ using DroneControl;
 using System.Net;
 using System.Collections.Generic;
 using System.Text;
+using System.Windows.Forms;
 
 namespace Drone_Wars.Model
 {
     static class Network
     {
-        static NetworkStream stream = default(NetworkStream);
+        static NetworkStream stream;
         static List<LiteDrone> drones = new List<LiteDrone>();
 
         private static void sendMessage(int message, int id, int ip)
@@ -137,7 +138,6 @@ namespace Drone_Wars.Model
             {
                 while (true)
                 {
-                    stream = tcp.GetStream();
                     byte[] message = new byte[4];
 
                     try
@@ -246,6 +246,55 @@ namespace Drone_Wars.Model
                     phones.Close();
                 }
             });
+        }
+
+        static IPEndPoint serverAddress;
+        static Socket clientSocket;
+        static byte[] message;
+        static int width;
+        
+        public static void connect3(int x, int y)
+        {
+            serverAddress = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8002);
+            clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            clientSocket.Connect(serverAddress);
+            message = new byte[x*y];
+
+            width = x;
+            byte[] toSendLenBytes = BitConverter.GetBytes(message.Length);
+            message[0] = (byte)x;
+            message[1] = (byte)y;
+            clientSocket.Send(toSendLenBytes);
+            clientSocket.Send(message);
+        }
+
+        public static void updatePos()
+        {
+            for (int j = 0; j < message.Length; j++)
+            {
+                message[j] = 0;
+            }
+            byte[] toSendLenBytes = BitConverter.GetBytes(message.Length);
+            foreach (Drone d in Field.getDrones())
+            {
+                for (int i = 1; i < d.getFutPos().Length; i++)
+                {
+                    Position p = d.getFutPos()[i];
+                    message[p.getyPos() * width + p.getxPos()] = 2;
+                }
+            }
+            foreach (Drone d in Field.getDrones())
+            {
+                message[d.getYPos() * width + d.getXPos()] = 1;
+            }
+            try
+            {
+                clientSocket.Send(toSendLenBytes);
+                clientSocket.Send(message);
+            } catch (SocketException)
+            {
+                Application.Exit();
+            }
         }
     }
 }

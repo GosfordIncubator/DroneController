@@ -44,3 +44,4 @@ C:\Users\Hayden\Google Drive\Gosford Software Incubator\DroneController\Drone Wa
 C:\Users\Hayden\Google Drive\Gosford Software Incubator\DroneController\Drone Wars\obj\Debug\Drone Wars.csproj.GenerateResource.Cache
 C:\Users\Hayden\Google Drive\Gosford Software Incubator\DroneController\Drone Wars\obj\Debug\Drone Wars.exe
 C:\Users\Hayden\Google Drive\Gosford Software Incubator\DroneController\Drone Wars\obj\Debug\Drone Wars.pdb
+C:\Users\Hayden\Google Drive\Gosford Software Incubator\DroneController\Drone Wars\obj\Debug\Drone Wars.csprojResolveAssemblyReference.cache

@@ -42,10 +42,8 @@
             this.numberTb = new System.Windows.Forms.TextBox();
             this.flyBtn = new System.Windows.Forms.Button();
             this.landBtn = new System.Windows.Forms.Button();
-            this.mapGv = new System.Windows.Forms.DataGridView();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.ipTb = new System.Windows.Forms.TextBox();
-            ((System.ComponentModel.ISupportInitialize)(this.mapGv)).BeginInit();
             this.SuspendLayout();
             // 
             // dronesLb
@@ -173,21 +171,6 @@
             this.landBtn.UseVisualStyleBackColor = true;
             this.landBtn.Click += new System.EventHandler(this.landBtn_Click);
             // 
-            // mapGv
-            // 
-            this.mapGv.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
-            this.mapGv.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
-            this.mapGv.BackgroundColor = System.Drawing.SystemColors.ControlDark;
-            this.mapGv.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.mapGv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.mapGv.ColumnHeadersVisible = false;
-            this.mapGv.Location = new System.Drawing.Point(202, 3);
-            this.mapGv.Name = "mapGv";
-            this.mapGv.RowHeadersVisible = false;
-            this.mapGv.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.mapGv.Size = new System.Drawing.Size(179, 153);
-            this.mapGv.TabIndex = 13;
-            // 
             // timer1
             // 
             this.timer1.Interval = 500;
@@ -207,9 +190,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(390, 308);
+            this.ClientSize = new System.Drawing.Size(210, 308);
             this.Controls.Add(this.ipTb);
-            this.Controls.Add(this.mapGv);
             this.Controls.Add(this.landBtn);
             this.Controls.Add(this.flyBtn);
             this.Controls.Add(this.numberTb);
@@ -226,7 +208,6 @@
             this.Name = "DroneController";
             this.Text = "Drone Wars";
             this.Load += new System.EventHandler(this.DroneController_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.mapGv)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -247,7 +228,6 @@
         private System.Windows.Forms.TextBox numberTb;
         private System.Windows.Forms.Button flyBtn;
         private System.Windows.Forms.Button landBtn;
-        private System.Windows.Forms.DataGridView mapGv;
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.TextBox ipTb;
     }

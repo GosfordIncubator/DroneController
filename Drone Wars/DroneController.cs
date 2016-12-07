@@ -22,14 +22,12 @@ namespace Drone_Wars
             {
                 Network.connect();
                 Network.connect2();
+                Network.connect3(FieldSizeChooser.X, FieldSizeChooser.Y);
 
                 Field.setupField(FieldSizeChooser.X, FieldSizeChooser.Y, 5);
                 timer1.Enabled = true;
 
                 dronesLb.DataSource = Field.getDrones();
-                mapGv.BackgroundColor = DroneController.DefaultBackColor;
-
-                createMap();
             }
             else
             {
@@ -143,30 +141,6 @@ namespace Drone_Wars
             }
         }
 
-        public void setDroneSquare(Position position, string state)
-        {
-            if (position != null)
-            {
-                switch (state)
-                {
-                    case "landed":
-                        mapGv.Rows[position.getyPos()].Cells[position.getxPos()].Value = new Bitmap(Properties.Resources.landed);
-                        break;
-                    case "flying":
-                        mapGv.Rows[position.getyPos()].Cells[position.getxPos()].Value = new Bitmap(Properties.Resources.flying);
-                        break;
-                    case "prediction":
-                        mapGv.Rows[position.getyPos()].Cells[position.getxPos()].Value = new Bitmap(Properties.Resources.prediction);
-                        break;
-                }
-            }
-        }
-
-        public void setEmptySquare(Position position)
-        {
-            mapGv.Rows[position.getyPos()].Cells[position.getxPos()].Value = new Bitmap(Properties.Resources.empty);
-        }
-
         private void noDroneError()
         {
             MessageBox.Show("Please select a drone.", "Error");
@@ -181,30 +155,9 @@ namespace Drone_Wars
         {
             foreach (Drone drone in Field.getDrones())
             {
-                setEmptySquare(drone.getPosition());
-                for (int i = 2; i < 3; i++)
-                {
-                    Position p = drone.getFutPos()[i];
-                    if (p != null &&!p.equals(drone.getPosition())) setEmptySquare(p);
-                }
                 drone.operate();
-                setDroneSquare(drone.getPosition(), drone.getState());
-
-                if (!drone.getPosition().equals(drone.getFuturePos(1)))
-                {
-                    for (int i = 1; i < 3; i++)
-                    {
-                        Position p = drone.getFutPos()[i];
-                        if (p != null)
-                        {
-                            if (!Field.isOccupied(p) && p.isInside())
-                            {
-                                setDroneSquare(p, "prediction");
-                            }
-                        }
-                    }
-                }
             }
+            Network.updatePos();
         }
 
         private Drone getSelectedDrone()
@@ -244,60 +197,6 @@ namespace Drone_Wars
             }
             ipTb.Text = "192.168.1.";
             return ip;
-        }
-
-        private async void createMap()
-        {
-            var progress = new Progress<string>();
-            await Task.Factory.StartNew(() => SecondThreadConcern.LongWork(progress),
-                                        TaskCreationOptions.LongRunning);
-
-            for (int x = 0; x < Field.getFieldLengthX(); x++)
-            {
-                mapGv.Columns.Add(new DataGridViewImageColumn());
-            }
-
-            for (int y = 0; y < Field.getFieldLengthY() - 1; y++)
-            {
-                mapGv.Rows.Add();
-            }
-
-            for (int x = 0; x < Field.getFieldLengthX(); x++)
-            {
-                for (int y = 0; y < Field.getFieldLengthY(); y++)
-                {
-                    mapGv.Rows[y].Cells[x].Value = new Bitmap(Properties.Resources.empty);
-                }
-            }
-
-            int height = 0;
-            foreach (DataGridViewRow row in mapGv.Rows)
-            {
-                height += row.Height;
-            }
-            height += mapGv.ColumnHeadersHeight;
-
-            int width = 0;
-            foreach (DataGridViewColumn col in mapGv.Columns)
-            {
-                width += col.Width;
-            }
-            width += mapGv.RowHeadersWidth;
-
-            mapGv.ClientSize = new Size(width + 2, height + 2);
-        }
-
-        class SecondThreadConcern
-        {
-            public static void LongWork(IProgress<string> progress)
-            {
-                // Perform a long running work...
-                for (var i = 0; i < 10; i++)
-                {
-                    Task.Delay(500).Wait();
-                    progress.Report(i.ToString());
-                }
-            }
         }
     }
 }
