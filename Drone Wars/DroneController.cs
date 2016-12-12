@@ -3,13 +3,14 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using Drone_Wars.Model;
+using System.Drawing.Drawing2D;
 
 namespace Drone_Wars
 {
     public partial class DroneController : Form
     {
-        int cellSize = 8;
-        int offSet = 2;
+        int cellSize = 80;
+        int offSet;
         int rectSize;
 
         public DroneController()
@@ -27,13 +28,26 @@ namespace Drone_Wars
             {
                 Network.connect();
                 Network.connect2();
-                
-                rectSize = cellSize - (2 * offSet);
+
+                int h = Screen.GetBounds(this).Height;
+                int w = Screen.GetBounds(this).Width;
+
+                for (int i = 0; i < 3; i++) {
+                    if (cellSize * FieldSizeChooser.Y > h) {
+                        cellSize /= 2;
+                    }
+                }
+
+                if (cellSize == 80) { rectSize = 60; offSet = 10; }
+                if (cellSize == 40) { rectSize = 30; offSet = 5; }
+                if (cellSize == 20) { rectSize = 16; offSet = 2; }
+                if (cellSize == 10) { rectSize = 7; offSet = 2; }
+
                 fieldPnl.Width = cellSize * FieldSizeChooser.X;
                 fieldPnl.Height = cellSize * FieldSizeChooser.Y;
                 fieldPnl.Width++;
                 fieldPnl.Height++;
-                
+
                 Field.setupField(FieldSizeChooser.X, FieldSizeChooser.Y, 5);
                 timer1.Enabled = true;
 
@@ -162,6 +176,12 @@ namespace Drone_Wars
 
         private void fieldPnl_Paint(object sender, PaintEventArgs e)
         {
+            if (cellSize >= 40)
+            {
+                e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+                e.Graphics.PixelOffsetMode = PixelOffsetMode.None;
+            }
+
             drawGrid(e);
 
             foreach (Drone drone in Field.getDrones())
@@ -199,18 +219,27 @@ namespace Drone_Wars
 
             if (state.Equals("landed"))
             {
-                Pen myPen = new Pen(Color.Black);
-                formGraphics.DrawRectangle(myPen, new Rectangle(cellSize * p.getxPos() + offSet, cellSize * p.getyPos() + offSet, rectSize, rectSize));
+                SolidBrush myBrush = new SolidBrush(Color.Black);
+                if (cellSize >= 20)
+                {
+                    formGraphics.DrawImage(Properties.Resources.landed, cellSize * p.getxPos() + offSet, cellSize * p.getyPos() + offSet, rectSize, rectSize);
+                } else formGraphics.FillRectangle(myBrush, new Rectangle(cellSize * p.getxPos() + offSet, cellSize * p.getyPos() + offSet, rectSize, rectSize));
             }
             if (state.Equals("flying"))
             {
-                Pen myPen = new Pen(Color.Red);
-                formGraphics.DrawRectangle(myPen, new Rectangle(cellSize * p.getxPos() + offSet, cellSize * p.getyPos() + offSet, rectSize, rectSize));
+                SolidBrush myBrush = new SolidBrush(Color.Red);
+                if (cellSize >= 20)
+                {
+                    formGraphics.DrawImage(Properties.Resources.flying, cellSize * p.getxPos() + offSet, cellSize * p.getyPos() + offSet, rectSize, rectSize);
+                } else formGraphics.FillRectangle(myBrush, new Rectangle(cellSize * p.getxPos() + offSet, cellSize * p.getyPos() + offSet, rectSize, rectSize));
             }
             if (state.Equals("prediction"))
             {
-                Pen myPen = new Pen(Color.Gray);
-                formGraphics.DrawRectangle(myPen, new Rectangle(cellSize * p.getxPos() + offSet, cellSize * p.getyPos() + offSet, rectSize, rectSize));
+                SolidBrush myBrush = new SolidBrush(Color.Gray);
+                if (cellSize >= 20)
+                {
+                    formGraphics.DrawImage(Properties.Resources.prediction, cellSize * p.getxPos() + offSet, cellSize * p.getyPos() + offSet, rectSize, rectSize);
+                } else formGraphics.FillRectangle(myBrush, new Rectangle(cellSize * p.getxPos() + offSet, cellSize * p.getyPos() + offSet, rectSize, rectSize));
             }
         }
 

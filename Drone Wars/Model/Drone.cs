@@ -147,7 +147,7 @@ namespace DroneControl
                     case "forward":
                         if (isSafeForward(position))
                         {
-                            if (inputLag == 0) inputLag+=2;
+                            if (inputLag == 0) inputLag++;
                             Network.sendForward(id);
                             yAction = action;
                             yActionCount = actionCount;
@@ -156,7 +156,7 @@ namespace DroneControl
                     case "backward":
                         if (isSafeBackward(position))
                         {
-                            if (inputLag == 0) inputLag += 2;
+                            if (inputLag == 0) inputLag++;
                             Network.sendBackward(id);
                             yAction = action;
                             yActionCount = actionCount;
@@ -165,7 +165,7 @@ namespace DroneControl
                     case "left":
                         if (isSafeLeft(position))
                         {
-                            if (inputLag == 0) inputLag+=2;
+                            if (inputLag == 0) inputLag++;
                             Network.sendLeft(id);
                             xAction = action;
                             xActionCount = actionCount;
@@ -174,7 +174,7 @@ namespace DroneControl
                     case "right":
                         if (isSafeRight(position))
                         {
-                            if (inputLag == 0) inputLag+=2;
+                            if (inputLag == 0) inputLag++;
                             Network.sendRight(id);
                             xAction = action;
                             xActionCount = actionCount;
@@ -183,7 +183,7 @@ namespace DroneControl
                     case "up":
                         if (isSafeUp(position))
                         {
-                            if (inputLag == 0) inputLag += 2;
+                            if (inputLag == 0) inputLag++;
                             Network.sendUp(id);
                             zAction = action;
                             zActionCount = actionCount;
@@ -192,7 +192,7 @@ namespace DroneControl
                     case "down":
                         if (isSafeDown(position))
                         {
-                            if (inputLag == 0) inputLag += 2;
+                            if (inputLag == 0) inputLag++;
                             Network.sendDown(id);
                             zAction = action;
                             zActionCount = actionCount;
@@ -829,7 +829,7 @@ namespace DroneControl
             return position.getzPos() - 1 > 0;
         }
 
-        public Position getFuturePos(int i)
+        private Position getFuturePos(int i)
         {
             Position position = new Position(0,0,0);
             position.set(this.position); ;

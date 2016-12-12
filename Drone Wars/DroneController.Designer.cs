@@ -203,9 +203,10 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScroll = true;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(468, 280);
+            this.ClientSize = new System.Drawing.Size(462, 280);
             this.Controls.Add(this.fieldPnl);
             this.Controls.Add(this.ipTb);
             this.Controls.Add(this.landBtn);
@@ -221,13 +222,11 @@
             this.Controls.Add(this.removeDroneBtn);
             this.Controls.Add(this.addDroneBtn);
             this.Controls.Add(this.dronesLb);
-            this.MaximizeBox = false;
             this.Name = "DroneController";
             this.Padding = new System.Windows.Forms.Padding(5);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Drone Wars";
             this.Load += new System.EventHandler(this.DroneController_Load);
-            this.Shown += new System.EventHandler(this.DroneController_Shown);
             this.ResumeLayout(false);
             this.PerformLayout();
 
