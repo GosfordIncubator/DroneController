@@ -29,23 +29,23 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DroneController));
             this.dronesLb = new System.Windows.Forms.ListBox();
             this.addDroneBtn = new System.Windows.Forms.Button();
             this.removeDroneBtn = new System.Windows.Forms.Button();
-            this.forwardBtn = new System.Windows.Forms.Button();
-            this.leftBtn = new System.Windows.Forms.Button();
-            this.backwardsBtn = new System.Windows.Forms.Button();
-            this.rightBtn = new System.Windows.Forms.Button();
             this.upBtn = new System.Windows.Forms.Button();
             this.downBtn = new System.Windows.Forms.Button();
             this.stopBtn = new System.Windows.Forms.Button();
             this.numberTb = new System.Windows.Forms.TextBox();
             this.flyBtn = new System.Windows.Forms.Button();
             this.landBtn = new System.Windows.Forms.Button();
-            this.mapGv = new System.Windows.Forms.DataGridView();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.ipTb = new System.Windows.Forms.TextBox();
-            ((System.ComponentModel.ISupportInitialize)(this.mapGv)).BeginInit();
+            this.rightBtn = new System.Windows.Forms.Button();
+            this.backwardsBtn = new System.Windows.Forms.Button();
+            this.leftBtn = new System.Windows.Forms.Button();
+            this.forwardBtn = new System.Windows.Forms.Button();
+            this.fieldPnl = new BufferedPanel();
             this.SuspendLayout();
             // 
             // dronesLb
@@ -68,7 +68,7 @@
             // 
             // removeDroneBtn
             // 
-            this.removeDroneBtn.Location = new System.Drawing.Point(12, 162);
+            this.removeDroneBtn.Location = new System.Drawing.Point(107, 3);
             this.removeDroneBtn.Name = "removeDroneBtn";
             this.removeDroneBtn.Size = new System.Drawing.Size(89, 23);
             this.removeDroneBtn.TabIndex = 2;
@@ -76,49 +76,9 @@
             this.removeDroneBtn.UseVisualStyleBackColor = true;
             this.removeDroneBtn.Click += new System.EventHandler(this.removeDroneBtn_Click);
             // 
-            // forwardBtn
-            // 
-            this.forwardBtn.Location = new System.Drawing.Point(41, 223);
-            this.forwardBtn.Name = "forwardBtn";
-            this.forwardBtn.Size = new System.Drawing.Size(23, 23);
-            this.forwardBtn.TabIndex = 3;
-            this.forwardBtn.Text = "F";
-            this.forwardBtn.UseVisualStyleBackColor = true;
-            this.forwardBtn.Click += new System.EventHandler(this.forwardBtn_Click);
-            // 
-            // leftBtn
-            // 
-            this.leftBtn.Location = new System.Drawing.Point(12, 252);
-            this.leftBtn.Name = "leftBtn";
-            this.leftBtn.Size = new System.Drawing.Size(23, 23);
-            this.leftBtn.TabIndex = 4;
-            this.leftBtn.Text = "L";
-            this.leftBtn.UseVisualStyleBackColor = true;
-            this.leftBtn.Click += new System.EventHandler(this.leftBtn_Click);
-            // 
-            // backwardsBtn
-            // 
-            this.backwardsBtn.Location = new System.Drawing.Point(41, 252);
-            this.backwardsBtn.Name = "backwardsBtn";
-            this.backwardsBtn.Size = new System.Drawing.Size(23, 23);
-            this.backwardsBtn.TabIndex = 5;
-            this.backwardsBtn.Text = "B";
-            this.backwardsBtn.UseVisualStyleBackColor = true;
-            this.backwardsBtn.Click += new System.EventHandler(this.backwardsBtn_Click);
-            // 
-            // rightBtn
-            // 
-            this.rightBtn.Location = new System.Drawing.Point(70, 252);
-            this.rightBtn.Name = "rightBtn";
-            this.rightBtn.Size = new System.Drawing.Size(23, 23);
-            this.rightBtn.TabIndex = 6;
-            this.rightBtn.Text = "R";
-            this.rightBtn.UseVisualStyleBackColor = true;
-            this.rightBtn.Click += new System.EventHandler(this.rightBtn_Click);
-            // 
             // upBtn
             // 
-            this.upBtn.Location = new System.Drawing.Point(99, 223);
+            this.upBtn.Location = new System.Drawing.Point(107, 194);
             this.upBtn.Name = "upBtn";
             this.upBtn.Size = new System.Drawing.Size(23, 23);
             this.upBtn.TabIndex = 7;
@@ -128,7 +88,7 @@
             // 
             // downBtn
             // 
-            this.downBtn.Location = new System.Drawing.Point(99, 252);
+            this.downBtn.Location = new System.Drawing.Point(107, 223);
             this.downBtn.Name = "downBtn";
             this.downBtn.Size = new System.Drawing.Size(23, 23);
             this.downBtn.TabIndex = 8;
@@ -138,9 +98,9 @@
             // 
             // stopBtn
             // 
-            this.stopBtn.Location = new System.Drawing.Point(128, 252);
+            this.stopBtn.Location = new System.Drawing.Point(107, 251);
             this.stopBtn.Name = "stopBtn";
-            this.stopBtn.Size = new System.Drawing.Size(40, 23);
+            this.stopBtn.Size = new System.Drawing.Size(89, 23);
             this.stopBtn.TabIndex = 9;
             this.stopBtn.Text = "Stop";
             this.stopBtn.UseVisualStyleBackColor = true;
@@ -148,16 +108,17 @@
             // 
             // numberTb
             // 
-            this.numberTb.Location = new System.Drawing.Point(12, 281);
+            this.numberTb.Location = new System.Drawing.Point(12, 252);
             this.numberTb.Name = "numberTb";
-            this.numberTb.Size = new System.Drawing.Size(81, 20);
+            this.numberTb.Size = new System.Drawing.Size(89, 20);
             this.numberTb.TabIndex = 10;
+            this.numberTb.Text = "1";
             // 
             // flyBtn
             // 
-            this.flyBtn.Location = new System.Drawing.Point(12, 191);
+            this.flyBtn.Location = new System.Drawing.Point(12, 162);
             this.flyBtn.Name = "flyBtn";
-            this.flyBtn.Size = new System.Drawing.Size(75, 23);
+            this.flyBtn.Size = new System.Drawing.Size(89, 23);
             this.flyBtn.TabIndex = 11;
             this.flyBtn.Text = "Fly Drone";
             this.flyBtn.UseVisualStyleBackColor = true;
@@ -165,28 +126,13 @@
             // 
             // landBtn
             // 
-            this.landBtn.Location = new System.Drawing.Point(121, 191);
+            this.landBtn.Location = new System.Drawing.Point(107, 162);
             this.landBtn.Name = "landBtn";
-            this.landBtn.Size = new System.Drawing.Size(75, 23);
+            this.landBtn.Size = new System.Drawing.Size(89, 23);
             this.landBtn.TabIndex = 12;
             this.landBtn.Text = "Land Drone";
             this.landBtn.UseVisualStyleBackColor = true;
             this.landBtn.Click += new System.EventHandler(this.landBtn_Click);
-            // 
-            // mapGv
-            // 
-            this.mapGv.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
-            this.mapGv.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
-            this.mapGv.BackgroundColor = System.Drawing.SystemColors.ControlDark;
-            this.mapGv.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.mapGv.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.mapGv.ColumnHeadersVisible = false;
-            this.mapGv.Location = new System.Drawing.Point(202, 3);
-            this.mapGv.Name = "mapGv";
-            this.mapGv.RowHeadersVisible = false;
-            this.mapGv.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.mapGv.Size = new System.Drawing.Size(179, 153);
-            this.mapGv.TabIndex = 13;
             // 
             // timer1
             // 
@@ -201,15 +147,67 @@
             this.ipTb.TabIndex = 14;
             this.ipTb.Text = "192.168.1.";
             // 
+            // rightBtn
+            // 
+            this.rightBtn.Image = ((System.Drawing.Image)(resources.GetObject("rightBtn.Image")));
+            this.rightBtn.Location = new System.Drawing.Point(75, 223);
+            this.rightBtn.Name = "rightBtn";
+            this.rightBtn.Size = new System.Drawing.Size(23, 23);
+            this.rightBtn.TabIndex = 6;
+            this.rightBtn.UseVisualStyleBackColor = true;
+            this.rightBtn.Click += new System.EventHandler(this.rightBtn_Click);
+            // 
+            // backwardsBtn
+            // 
+            this.backwardsBtn.Image = ((System.Drawing.Image)(resources.GetObject("backwardsBtn.Image")));
+            this.backwardsBtn.Location = new System.Drawing.Point(46, 223);
+            this.backwardsBtn.Name = "backwardsBtn";
+            this.backwardsBtn.Size = new System.Drawing.Size(23, 23);
+            this.backwardsBtn.TabIndex = 5;
+            this.backwardsBtn.UseVisualStyleBackColor = true;
+            this.backwardsBtn.Click += new System.EventHandler(this.backwardsBtn_Click);
+            // 
+            // leftBtn
+            // 
+            this.leftBtn.Image = ((System.Drawing.Image)(resources.GetObject("leftBtn.Image")));
+            this.leftBtn.Location = new System.Drawing.Point(17, 223);
+            this.leftBtn.Name = "leftBtn";
+            this.leftBtn.Size = new System.Drawing.Size(23, 23);
+            this.leftBtn.TabIndex = 4;
+            this.leftBtn.UseVisualStyleBackColor = true;
+            this.leftBtn.Click += new System.EventHandler(this.leftBtn_Click);
+            // 
+            // forwardBtn
+            // 
+            this.forwardBtn.BackColor = System.Drawing.SystemColors.Control;
+            this.forwardBtn.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.forwardBtn.Image = ((System.Drawing.Image)(resources.GetObject("forwardBtn.Image")));
+            this.forwardBtn.Location = new System.Drawing.Point(46, 194);
+            this.forwardBtn.Name = "forwardBtn";
+            this.forwardBtn.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.forwardBtn.Size = new System.Drawing.Size(23, 23);
+            this.forwardBtn.TabIndex = 3;
+            this.forwardBtn.UseVisualStyleBackColor = false;
+            this.forwardBtn.Click += new System.EventHandler(this.forwardBtn_Click);
+            // 
+            // fieldPnl
+            // 
+            this.fieldPnl.BackColor = System.Drawing.Color.White;
+            this.fieldPnl.Location = new System.Drawing.Point(202, 3);
+            this.fieldPnl.Name = "fieldPnl";
+            this.fieldPnl.Size = new System.Drawing.Size(254, 269);
+            this.fieldPnl.TabIndex = 16;
+            this.fieldPnl.Paint += new System.Windows.Forms.PaintEventHandler(this.fieldPnl_Paint);
+            // 
             // DroneController
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.ClientSize = new System.Drawing.Size(390, 308);
+            this.ClientSize = new System.Drawing.Size(468, 280);
+            this.Controls.Add(this.fieldPnl);
             this.Controls.Add(this.ipTb);
-            this.Controls.Add(this.mapGv);
             this.Controls.Add(this.landBtn);
             this.Controls.Add(this.flyBtn);
             this.Controls.Add(this.numberTb);
@@ -223,10 +221,13 @@
             this.Controls.Add(this.removeDroneBtn);
             this.Controls.Add(this.addDroneBtn);
             this.Controls.Add(this.dronesLb);
+            this.MaximizeBox = false;
             this.Name = "DroneController";
+            this.Padding = new System.Windows.Forms.Padding(5);
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Drone Wars";
             this.Load += new System.EventHandler(this.DroneController_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.mapGv)).EndInit();
+            this.Shown += new System.EventHandler(this.DroneController_Shown);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -247,9 +248,9 @@
         private System.Windows.Forms.TextBox numberTb;
         private System.Windows.Forms.Button flyBtn;
         private System.Windows.Forms.Button landBtn;
-        private System.Windows.Forms.DataGridView mapGv;
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.TextBox ipTb;
+        private BufferedPanel fieldPnl;
     }
 }
 

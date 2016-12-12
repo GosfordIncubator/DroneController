@@ -46,6 +46,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BufferedPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="FieldSizeChooser.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -108,6 +111,27 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\prediction.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\DroneDown.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\DroneUp.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ArrowUp2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ArrowDown.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ArrowLeft.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ArrowRight.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ArrowUp.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
