@@ -3,14 +3,12 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 using Drone_Wars.Model;
+using System.Threading.Tasks;
 
 namespace Drone_Wars
 {
     public partial class DroneController : Form
     {
-        int cellSize = 8;
-        int offSet = 2;
-        int rectSize;
 
         public DroneController()
         {
@@ -19,25 +17,19 @@ namespace Drone_Wars
 
         private void DroneController_Load(object sender, EventArgs e)
         {
-            upBtn.Hide();
-            downBtn.Hide();
-
             FieldSizeChooser FieldSizeChooser = new FieldSizeChooser();
             if (FieldSizeChooser.ShowDialog() == DialogResult.OK)
             {
                 Network.connect();
                 Network.connect2();
-                
-                rectSize = cellSize - (2 * offSet);
-                fieldPnl.Width = cellSize * FieldSizeChooser.X;
-                fieldPnl.Height = cellSize * FieldSizeChooser.Y;
-                fieldPnl.Width++;
-                fieldPnl.Height++;
-                
+
                 Field.setupField(FieldSizeChooser.X, FieldSizeChooser.Y, 5);
                 timer1.Enabled = true;
 
                 dronesLb.DataSource = Field.getDrones();
+                mapGv.BackgroundColor = DroneController.DefaultBackColor;
+
+                createMap();
             }
             else
             {
@@ -151,66 +143,67 @@ namespace Drone_Wars
             }
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        public void setDroneSquare(Position position, string state)
         {
-            foreach (Drone drone in Field.getDrones())
+            if (position != null)
             {
-                drone.operate();
-            }
-            fieldPnl.Refresh();
-        }
-
-        private void fieldPnl_Paint(object sender, PaintEventArgs e)
-        {
-            drawGrid(e);
-
-            foreach (Drone drone in Field.getDrones())
-            {
-                setDroneSquare(drone.getPosition(), drone.getState(), e);
-
-                foreach (Position p in drone.getFutPos())
+                switch (state)
                 {
-                    if (!drone.getPosition().equals(p)) setDroneSquare(p, "prediction", e);
+                    case "landed":
+                        mapGv.Rows[position.getyPos()].Cells[position.getxPos()].Value = new Bitmap(Properties.Resources.landed);
+                        break;
+                    case "flying":
+                        mapGv.Rows[position.getyPos()].Cells[position.getxPos()].Value = new Bitmap(Properties.Resources.flying);
+                        break;
+                    case "prediction":
+                        mapGv.Rows[position.getyPos()].Cells[position.getxPos()].Value = new Bitmap(Properties.Resources.prediction);
+                        break;
                 }
             }
         }
 
-        private void drawGrid(PaintEventArgs e)
+        public void setEmptySquare(Position position)
         {
-            Graphics formGraphics = e.Graphics;
-            Pen myPen = new Pen(Color.Black);
-
-            for (int i = 0; i <= fieldPnl.Width / cellSize; i++)
-            {
-                formGraphics.DrawLine(myPen, i * cellSize, 0, i * cellSize, fieldPnl.Height);
-            }
-
-            for (int j = 0; j <= fieldPnl.Height / cellSize; j++)
-            {
-                formGraphics.DrawLine(myPen, 0, j * cellSize, fieldPnl.Width, j * cellSize);
-            }
-
-            myPen.Dispose();
+            mapGv.Rows[position.getyPos()].Cells[position.getxPos()].Value = new Bitmap(Properties.Resources.empty);
         }
 
-        private void setDroneSquare(Position p, string state, PaintEventArgs e)
+        private void noDroneError()
         {
-            Graphics formGraphics = e.Graphics;
+            MessageBox.Show("Please select a drone.", "Error");
+        }
 
-            if (state.Equals("landed"))
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            operate();
+        }
+
+        public void operate()
+        {
+            foreach (Drone drone in Field.getDrones())
             {
-                Pen myPen = new Pen(Color.Black);
-                formGraphics.DrawRectangle(myPen, new Rectangle(cellSize * p.getxPos() + offSet, cellSize * p.getyPos() + offSet, rectSize, rectSize));
-            }
-            if (state.Equals("flying"))
-            {
-                Pen myPen = new Pen(Color.Red);
-                formGraphics.DrawRectangle(myPen, new Rectangle(cellSize * p.getxPos() + offSet, cellSize * p.getyPos() + offSet, rectSize, rectSize));
-            }
-            if (state.Equals("prediction"))
-            {
-                Pen myPen = new Pen(Color.Gray);
-                formGraphics.DrawRectangle(myPen, new Rectangle(cellSize * p.getxPos() + offSet, cellSize * p.getyPos() + offSet, rectSize, rectSize));
+                setEmptySquare(drone.getPosition());
+                for (int i = 2; i < 3; i++)
+                {
+                    Position p = drone.getFutPos()[i];
+                    if (p != null &&!p.equals(drone.getPosition())) setEmptySquare(p);
+                }
+                drone.operate();
+                setDroneSquare(drone.getPosition(), drone.getState());
+
+                if (!drone.getPosition().equals(drone.getFuturePos(1)))
+                {
+                    for (int i = 1; i < 3; i++)
+                    {
+                        Position p = drone.getFutPos()[i];
+                        if (p != null)
+                        {
+                            if (!Field.isOccupied(p) && p.isInside())
+                            {
+                                setDroneSquare(p, "prediction");
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -226,12 +219,14 @@ namespace Drone_Wars
                 if (Int32.Parse(numberTb.Text) > 0)
                 {
                     return Int32.Parse(numberTb.Text);
-                } else
+                }
+                else
                 {
                     MessageBox.Show("Please enter a number greater than 0", "Error");
                     return 0;
                 }
-            } catch (FormatException)
+            }
+            catch (FormatException)
             {
                 return 0;
             }
@@ -251,9 +246,58 @@ namespace Drone_Wars
             return ip;
         }
 
-        private void noDroneError()
+        private async void createMap()
         {
-            MessageBox.Show("Please select a drone.", "Error");
+            var progress = new Progress<string>();
+            await Task.Factory.StartNew(() => SecondThreadConcern.LongWork(progress),
+                                        TaskCreationOptions.LongRunning);
+
+            for (int x = 0; x < Field.getFieldLengthX(); x++)
+            {
+                mapGv.Columns.Add(new DataGridViewImageColumn());
+            }
+
+            for (int y = 0; y < Field.getFieldLengthY() - 1; y++)
+            {
+                mapGv.Rows.Add();
+            }
+
+            for (int x = 0; x < Field.getFieldLengthX(); x++)
+            {
+                for (int y = 0; y < Field.getFieldLengthY(); y++)
+                {
+                    mapGv.Rows[y].Cells[x].Value = new Bitmap(Properties.Resources.empty);
+                }
+            }
+
+            int height = 0;
+            foreach (DataGridViewRow row in mapGv.Rows)
+            {
+                height += row.Height;
+            }
+            height += mapGv.ColumnHeadersHeight;
+
+            int width = 0;
+            foreach (DataGridViewColumn col in mapGv.Columns)
+            {
+                width += col.Width;
+            }
+            width += mapGv.RowHeadersWidth;
+
+            mapGv.ClientSize = new Size(width + 2, height + 2);
+        }
+
+        class SecondThreadConcern
+        {
+            public static void LongWork(IProgress<string> progress)
+            {
+                // Perform a long running work...
+                for (var i = 0; i < 10; i++)
+                {
+                    Task.Delay(500).Wait();
+                    progress.Report(i.ToString());
+                }
+            }
         }
     }
 }
