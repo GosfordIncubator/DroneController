@@ -38,7 +38,7 @@
             // xLbl
             // 
             this.xLbl.AutoSize = true;
-            this.xLbl.Location = new System.Drawing.Point(39, 15);
+            this.xLbl.Location = new System.Drawing.Point(17, 15);
             this.xLbl.Name = "xLbl";
             this.xLbl.Size = new System.Drawing.Size(35, 13);
             this.xLbl.TabIndex = 0;
@@ -47,7 +47,7 @@
             // yLbl
             // 
             this.yLbl.AutoSize = true;
-            this.yLbl.Location = new System.Drawing.Point(34, 41);
+            this.yLbl.Location = new System.Drawing.Point(12, 41);
             this.yLbl.Name = "yLbl";
             this.yLbl.Size = new System.Drawing.Size(40, 13);
             this.yLbl.TabIndex = 1;
@@ -56,7 +56,7 @@
             // okBtn
             // 
             this.okBtn.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.okBtn.Location = new System.Drawing.Point(80, 74);
+            this.okBtn.Location = new System.Drawing.Point(58, 64);
             this.okBtn.Name = "okBtn";
             this.okBtn.Size = new System.Drawing.Size(75, 23);
             this.okBtn.TabIndex = 2;
@@ -65,14 +65,14 @@
             // 
             // xTb
             // 
-            this.xTb.Location = new System.Drawing.Point(80, 12);
+            this.xTb.Location = new System.Drawing.Point(58, 12);
             this.xTb.Name = "xTb";
             this.xTb.Size = new System.Drawing.Size(100, 20);
             this.xTb.TabIndex = 3;
             // 
             // yTb
             // 
-            this.yTb.Location = new System.Drawing.Point(80, 38);
+            this.yTb.Location = new System.Drawing.Point(58, 38);
             this.yTb.Name = "yTb";
             this.yTb.Size = new System.Drawing.Size(100, 20);
             this.yTb.TabIndex = 4;
@@ -81,14 +81,20 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(235, 109);
+            this.ClientSize = new System.Drawing.Size(189, 93);
             this.Controls.Add(this.yTb);
             this.Controls.Add(this.xTb);
             this.Controls.Add(this.okBtn);
             this.Controls.Add(this.yLbl);
             this.Controls.Add(this.xLbl);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "FieldSizeChooser";
+            this.ShowIcon = false;
+            this.ShowInTaskbar = false;
             this.Text = "Set a field size...";
+            this.TopMost = true;
             this.ResumeLayout(false);
             this.PerformLayout();
 

@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using Drone_Wars.Model;
 using System.Drawing.Drawing2D;
+using System.Net.Sockets;
 
 namespace Drone_Wars
 {
@@ -23,36 +24,64 @@ namespace Drone_Wars
             upBtn.Hide();
             downBtn.Hide();
 
-            Network.connectServer();
-            Network.connectPhones();
+            int timeout = 0;
+
+            for (int i = 0; i < 5; i++)
+            {
+                try
+                {
+                    System.Threading.Thread.Sleep(10);
+                    Network.connectServer();
+                    Network.connectPhones();
+                    break;
+                } catch (SocketException)
+                {
+                    timeout++;
+                }
+            }
+
+            if (timeout == 5)
+            {
+                MessageBox.Show("Could not find server. Please ensure server is running before starting client.", "Error");
+                Close();
+            }
 
             FieldSizeChooser FieldSizeChooser = new FieldSizeChooser();
             if (FieldSizeChooser.ShowDialog() == DialogResult.OK)
             {
-                int h = Screen.GetBounds(this).Height;
-                int w = Screen.GetBounds(this).Width;
+                if (FieldSizeChooser.X > 0 && FieldSizeChooser.Y > 0)
+                {
+                    int h = Screen.GetBounds(this).Height;
+                    int w = Screen.GetBounds(this).Width;
 
-                for (int i = 0; i < 4; i++) {
-                    if (cellSize * FieldSizeChooser.Y > h) {
-                        cellSize /= 2;
+                    for (int i = 0; i < 4; i++)
+                    {
+                        if (cellSize * FieldSizeChooser.Y + 80 > h)
+                        {
+                            cellSize /= 2;
+                        }
                     }
+
+                    if (cellSize == 160) { rectSize = 120; offSet = 20; }
+                    if (cellSize == 80) { rectSize = 60; offSet = 10; }
+                    if (cellSize == 40) { rectSize = 30; offSet = 5; }
+                    if (cellSize == 20) { rectSize = 16; offSet = 2; }
+                    if (cellSize == 10) { rectSize = 6; offSet = 2; }
+
+                    fieldPnl.Width = cellSize * FieldSizeChooser.X;
+                    fieldPnl.Height = cellSize * FieldSizeChooser.Y;
+                    fieldPnl.Width++;
+                    fieldPnl.Height++;
+
+                    Field.setupField(FieldSizeChooser.X, FieldSizeChooser.Y, 5);
+                    timer1.Enabled = true;
+
+                    dronesLb.DataSource = Field.getDrones();
+                } else
+                {
+                    MessageBox.Show("Field size invalid.", "Error");
+                    Close();
                 }
-
-                if (cellSize == 160) { rectSize = 120; offSet = 20; }
-                if (cellSize == 80) { rectSize = 60; offSet = 10; }
-                if (cellSize == 40) { rectSize = 30; offSet = 5; }
-                if (cellSize == 20) { rectSize = 16; offSet = 2; }
-                if (cellSize == 10) { rectSize = 6; offSet = 2; }
-
-                fieldPnl.Width = cellSize * FieldSizeChooser.X;
-                fieldPnl.Height = cellSize * FieldSizeChooser.Y;
-                fieldPnl.Width++;
-                fieldPnl.Height++;
-
-                Field.setupField(FieldSizeChooser.X, FieldSizeChooser.Y, 5);
-                timer1.Enabled = true;
-
-                dronesLb.DataSource = Field.getDrones();
             }
             else
             {
