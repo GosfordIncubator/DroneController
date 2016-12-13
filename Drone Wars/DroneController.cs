@@ -9,7 +9,7 @@ namespace Drone_Wars
 {
     public partial class DroneController : Form
     {
-        int cellSize = 80;
+        int cellSize = 160;
         int offSet;
         int rectSize;
 
@@ -23,25 +23,26 @@ namespace Drone_Wars
             upBtn.Hide();
             downBtn.Hide();
 
+            Network.connectServer();
+            Network.connectPhones();
+
             FieldSizeChooser FieldSizeChooser = new FieldSizeChooser();
             if (FieldSizeChooser.ShowDialog() == DialogResult.OK)
             {
-                Network.connect();
-                Network.connect2();
-
                 int h = Screen.GetBounds(this).Height;
                 int w = Screen.GetBounds(this).Width;
 
-                for (int i = 0; i < 3; i++) {
+                for (int i = 0; i < 4; i++) {
                     if (cellSize * FieldSizeChooser.Y > h) {
                         cellSize /= 2;
                     }
                 }
 
+                if (cellSize == 160) { rectSize = 120; offSet = 20; }
                 if (cellSize == 80) { rectSize = 60; offSet = 10; }
                 if (cellSize == 40) { rectSize = 30; offSet = 5; }
                 if (cellSize == 20) { rectSize = 16; offSet = 2; }
-                if (cellSize == 10) { rectSize = 7; offSet = 2; }
+                if (cellSize == 10) { rectSize = 6; offSet = 2; }
 
                 fieldPnl.Width = cellSize * FieldSizeChooser.X;
                 fieldPnl.Height = cellSize * FieldSizeChooser.Y;
@@ -283,6 +284,11 @@ namespace Drone_Wars
         private void noDroneError()
         {
             MessageBox.Show("Please select a drone.", "Error");
+        }
+
+        private void DroneController_FormClosed(Object sender, FormClosedEventArgs e)
+        {
+           Network.closeServer();
         }
     }
 }

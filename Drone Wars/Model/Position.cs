@@ -36,23 +36,6 @@ namespace DroneControl
             return true;
         }
 
-        public Movement getPath(Position origin)
-        {
-            int xDistance = xPos - origin.getxPos();
-            int yDistance = yPos - origin.getyPos();
-            int zDistance = zPos - origin.getzPos();
-
-            string xDirection = "None";
-            string yDirection = "None";
-            string zDirection = "None";
-
-            if (xDistance > 0) xDirection = "West"; else if (xDistance < 0) xDirection = "East";
-            if (yDistance > 0) yDirection = "North"; else if (yDistance < 0) yDirection = "South";
-            if (zDistance > 0) zDirection = "down"; else if (zDistance < 0) zDirection = "up";
-
-            return new Movement(Math.Abs(xDistance), Math.Abs(yDistance), Math.Abs(zDistance), xDirection,yDirection,zDirection);
-        }
-
         public void set(Position position)
         {
             xPos = position.getxPos();

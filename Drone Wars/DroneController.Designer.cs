@@ -226,6 +226,7 @@
             this.Padding = new System.Windows.Forms.Padding(5);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Drone Wars";
+            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.DroneController_FormClosed);
             this.Load += new System.EventHandler(this.DroneController_Load);
             this.ResumeLayout(false);
             this.PerformLayout();

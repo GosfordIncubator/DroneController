@@ -40,7 +40,7 @@ namespace DroneControl
             landed = true;
             state = "landed";
             this.ip = ip;
-            Network.sendNewDrone(id, ip);
+            Network.sendNewDrone(id);
         }
         
         public void operate()
@@ -77,15 +77,20 @@ namespace DroneControl
                             if (!isSafeForward(position))
                             {
                                 stopY();
+                            } else {
+                                position = moveForward(position);
+                                Network.moveTo(id, position);
                             }
-                            else position = moveForward(position);
                             break;
                         case "backward":
                             if (!isSafeBackward(position))
                             {
                                 stopY();
+                            } else
+                            {
+                                position = moveBackward(position);
+                                Network.moveTo(id, position);
                             }
-                            else position = moveBackward(position);
                             break;
                     }
                     yActionCount--;
@@ -99,15 +104,21 @@ namespace DroneControl
                             if (!isSafeLeft(position))
                             {
                                 stopX();
+                            } else
+                            {
+                                position = moveLeft(position);
+                                Network.moveTo(id, position);
                             }
-                            else position = moveLeft(position);
                             break;
                         case "right":
                             if (!isSafeRight(position))
                             {
                                 stopX();
+                            } else
+                            {
+                                position = moveRight(position);
+                                Network.moveTo(id, position);
                             }
-                            else position = moveRight(position);
                             break;
                     }
                     xActionCount--;
@@ -121,15 +132,21 @@ namespace DroneControl
                             if (!isSafeUp(position))
                             {
                                 stopZ();
+                            } else
+                            {
+                                position = moveUp(position);
+                                Network.moveTo(id, position);
                             }
-                            else position = moveUp(position);
                             break;
                         case "down":
                             if (!isSafeDown(position))
                             {
                                 land();
+                            } else
+                            {
+                                position = moveDown(position);
+                                Network.moveTo(id, position);
                             }
-                            else position = moveDown(position);
                             break;
                     }
                     zActionCount--;
@@ -148,7 +165,6 @@ namespace DroneControl
                         if (isSafeForward(position))
                         {
                             if (inputLag == 0) inputLag++;
-                            Network.sendForward(id);
                             yAction = action;
                             yActionCount = actionCount;
                         }
@@ -157,7 +173,6 @@ namespace DroneControl
                         if (isSafeBackward(position))
                         {
                             if (inputLag == 0) inputLag++;
-                            Network.sendBackward(id);
                             yAction = action;
                             yActionCount = actionCount;
                         }
@@ -166,7 +181,6 @@ namespace DroneControl
                         if (isSafeLeft(position))
                         {
                             if (inputLag == 0) inputLag++;
-                            Network.sendLeft(id);
                             xAction = action;
                             xActionCount = actionCount;
                         }
@@ -175,7 +189,6 @@ namespace DroneControl
                         if (isSafeRight(position))
                         {
                             if (inputLag == 0) inputLag++;
-                            Network.sendRight(id);
                             xAction = action;
                             xActionCount = actionCount;
                         }
@@ -184,7 +197,6 @@ namespace DroneControl
                         if (isSafeUp(position))
                         {
                             if (inputLag == 0) inputLag++;
-                            Network.sendUp(id);
                             zAction = action;
                             zActionCount = actionCount;
                         }
@@ -193,7 +205,6 @@ namespace DroneControl
                         if (isSafeDown(position))
                         {
                             if (inputLag == 0) inputLag++;
-                            Network.sendDown(id);
                             zAction = action;
                             zActionCount = actionCount;
                         }
@@ -252,31 +263,25 @@ namespace DroneControl
         public void stop()
         {
             Network.sendStop(id);
-            xAction = "None";
-            xActionCount = 0;
-            yAction = "None";
-            yActionCount = 0;
-            zAction = "None";
-            zActionCount = 0;
+            stopX();
+            stopY();
+            stopZ();
         }
 
         private void stopX()
         {
-            Network.sendStopX(id);
             xAction = "None";
             xActionCount = 0;
         }
 
         private void stopY()
         {
-            Network.sendStopY(id);
             yAction = "None";
             yActionCount = 0;
         }
 
         private void stopZ()
         {
-            Network.sendStopZ(id);
             zAction = "None";
             zActionCount = 0;
         }

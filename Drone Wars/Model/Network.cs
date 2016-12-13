@@ -5,6 +5,7 @@ using DroneControl;
 using System.Net;
 using System.Collections.Generic;
 using System.Text;
+using System.IO;
 
 namespace Drone_Wars.Model
 {
@@ -13,79 +14,44 @@ namespace Drone_Wars.Model
         static NetworkStream stream = default(NetworkStream);
         static List<LiteDrone> drones = new List<LiteDrone>();
 
-        private static void sendMessage(int message, int id, int ip)
+        static TcpClient server;
+        static Task taskOpenEndpoint;
+
+        private static void sendMessage(int id, int message, int x, int y, int z)
         { 
-            byte[] outStream = new byte[3];
-            outStream[0] = (byte)message;
-            outStream[1] = (byte)id;
-            outStream[2] = (byte)ip;
+            byte[] outStream = new byte[5];
+            outStream[0] = (byte)id;
+            outStream[1] = (byte)message;
+            outStream[2] = (byte)x;
+            outStream[3] = (byte)y;
+            outStream[4] = (byte)z;
             stream.Write(outStream, 0, outStream.Length);
             stream.Flush();
         }
 
         public static void sendTakeOff(int id)
         {
-            sendMessage(1, id, 0);
+            sendMessage(id, 3, 0, 0, 0);
         }
 
         public static void sendLand(int id)
         {
-            sendMessage(2, id, 0);
+            sendMessage(id, 4, 0, 0, 0);
         }
 
         public static void sendStop(int id)
         {
-            sendMessage(3, id, 0);
+            sendMessage(id, 6, 0, 0, 0);
         }
 
-        public static void sendStopX(int id)
+        public static void moveTo(int id, Position p)
         {
-            sendMessage(31, id, 0);
+            sendMessage(id, 5, p.getxPos(), p.getyPos(), p.getzPos());                            
         }
 
-        public static void sendStopY(int id)
+        public static void sendNewDrone(int id)
         {
-            sendMessage(32, id, 0);
-        }
-        
-        public static void sendStopZ(int id)
-        {
-            sendMessage(33, id, 0);
-        }
-
-        public static void sendForward(int id)
-        {
-            sendMessage(4, id, 0);
-        }
-
-        public static void sendBackward(int id)
-        {
-            sendMessage(5, id, 0);
-        }
-
-        public static void sendLeft(int id)
-        {
-            sendMessage(6, id, 0);
-        }
-
-        public static void sendRight(int id)
-        {
-            sendMessage(7, id, 0);
-        }
-
-        public static void sendUp(int id)
-        {
-            sendMessage(8, id, 0);
-        }
-
-        public static void sendDown(int id)
-        {
-            sendMessage(9, id, 0);
-        }
-
-        public static void sendNewDrone(int id, int ip)
-        {
-            sendMessage(10, id, ip);
+            sendMessage(id, 1, 0, 0, 0);
         }
 
         public static Position getDronePos(int id)
@@ -121,50 +87,46 @@ namespace Drone_Wars.Model
             }
             if (!found)
             {
-                drones.Add(new LiteDrone(id, x, y, z, null));
+                drones.Add(new LiteDrone(id, x, y, z));
             }
         }
 
-        public static void connect()
+        public static void connectServer()
         {
-            TcpClient tcp = new TcpClient();
-            tcp.Connect("localhost", 8000);
-            stream = tcp.GetStream();
+            bool active = true;
+            server = new TcpClient();
+            server.Connect("localhost", 8000);
+            stream = server.GetStream();
 
-            sendMessage(0,0,0);
+            sendMessage(0,0,0,0,0);
 
-            Task taskOpenEndpoint = Task.Factory.StartNew(() =>
+            taskOpenEndpoint = Task.Factory.StartNew(() =>
             {
-                while (true)
+                while (active)
                 {
-                    stream = tcp.GetStream();
-                    byte[] message = new byte[4];
-
-                    try
-                    {
+                    try {
+                        stream = server.GetStream();
+                        byte[] message = new byte[4];
                         stream.Read(message, 0, 4);
-                    }
-                    catch
+
+                        setDrone(message[0], message[1], message[2], message[3]);
+                    } catch (ObjectDisposedException)
                     {
-                        Console.WriteLine("Network error");
+                        active = false;
+                    } catch (IOException)
+                    {
+                        active = false;
                     }
-                    
-                    setDrone(message[0], message[1], message[2], message[3]);
                 }
             });
         }
 
-        public static Movement getMovement(int id)
+        public static void closeServer()
         {
-            return getDrone(id).getM();
+            server.Close();
         }
 
-        public static void setMovement(int id, Movement m)
-        {
-            getDrone(id).setM(m);
-        }
-
-        public static void connect2()
+        public static void connectPhones()
         {
             TcpClient phones;
             Task taskOpenEndpoint = Task.Factory.StartNew(() =>
