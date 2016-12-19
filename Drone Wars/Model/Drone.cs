@@ -79,7 +79,6 @@ namespace DroneControl
                                 stopY();
                             } else {
                                 position = moveForward(position);
-                                Network.moveTo(id, position);
                             }
                             break;
                         case "backward":
@@ -89,7 +88,6 @@ namespace DroneControl
                             } else
                             {
                                 position = moveBackward(position);
-                                Network.moveTo(id, position);
                             }
                             break;
                     }
@@ -107,7 +105,6 @@ namespace DroneControl
                             } else
                             {
                                 position = moveLeft(position);
-                                Network.moveTo(id, position);
                             }
                             break;
                         case "right":
@@ -117,7 +114,6 @@ namespace DroneControl
                             } else
                             {
                                 position = moveRight(position);
-                                Network.moveTo(id, position);
                             }
                             break;
                     }
@@ -135,7 +131,6 @@ namespace DroneControl
                             } else
                             {
                                 position = moveUp(position);
-                                Network.moveTo(id, position);
                             }
                             break;
                         case "down":
@@ -145,12 +140,13 @@ namespace DroneControl
                             } else
                             {
                                 position = moveDown(position);
-                                Network.moveTo(id, position);
                             }
                             break;
                     }
                     zActionCount--;
                 }
+
+                if (getMoves() > 1) Network.moveTo(id, futPos[0]);
             }
             else inputLag--;
         }
