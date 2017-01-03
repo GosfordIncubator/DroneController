@@ -12,16 +12,14 @@ namespace Drone_Wars.Model
         private int xPos;
         private int yPos;
         private int zPos;
-        private int orientation;
-        private Movement m;
-        public LiteDrone(int id, int xPos, int yPos, int zPos, Movement m)
+        private double orientation;
+        public LiteDrone(int id, int xPos, int yPos, int zPos, double orientation)
         {
             this.id = id;
             this.xPos = xPos;
             this.yPos = yPos;
             this.zPos = zPos;
-            //this.orientation = orientation;
-            this.m = m;
+            this.orientation = orientation;
         }
 
         public int getId()
@@ -59,24 +57,14 @@ namespace Drone_Wars.Model
             this.zPos = zPos;
         }
 
-        public int getOrientation()
+        public double getOrientation()
         {
             return orientation;
         }
 
-        public void setOrientation(int orientation)
+        public void setOrientation(double orientation)
         {
             this.orientation = orientation;
-        }
-
-        public Movement getM()
-        {
-            return m;
-        }
-
-        public void setM(Movement m)
-        {
-            this.m = m;
         }
     }
 }

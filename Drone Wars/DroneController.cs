@@ -4,15 +4,12 @@ using System.Drawing;
 using System.Windows.Forms;
 using Drone_Wars.Model;
 using System.Drawing.Drawing2D;
+using System.Net.Sockets;
 
 namespace Drone_Wars
 {
     public partial class DroneController : Form
     {
-        int cellSize = 80;
-        int offSet;
-        int rectSize;
-
         public DroneController()
         {
             InitializeComponent();
@@ -20,38 +17,50 @@ namespace Drone_Wars
 
         private void DroneController_Load(object sender, EventArgs e)
         {
-            upBtn.Hide();
-            downBtn.Hide();
+            int timeout = 0;
+
+            for (int i = 0; i < 5; i++)
+            {
+                try
+                {
+                    System.Threading.Thread.Sleep(10);
+                    Network.connectServer();
+                    
+                    break;
+                } catch (SocketException)
+                {
+                    timeout++;
+                }
+            }
+
+            if (timeout == 5)
+            {
+                MessageBox.Show("Could not find server. Please ensure server is running before starting client.", "Error");
+                Close();
+            }
+
+            Network.connectPhones();
 
             FieldSizeChooser FieldSizeChooser = new FieldSizeChooser();
             if (FieldSizeChooser.ShowDialog() == DialogResult.OK)
             {
-                Network.connect();
-                Network.connect2();
+                if (FieldSizeChooser.X > 0 && FieldSizeChooser.Y > 0)
+                {
+                    int h = Screen.GetBounds(this).Height;
+                    int w = Screen.GetBounds(this).Width;
 
-                int h = Screen.GetBounds(this).Height;
-                int w = Screen.GetBounds(this).Width;
+                    fieldPnl.Width = FieldSizeChooser.X*100;
+                    fieldPnl.Height = FieldSizeChooser.Y*100;
 
-                for (int i = 0; i < 3; i++) {
-                    if (cellSize * FieldSizeChooser.Y > h) {
-                        cellSize /= 2;
-                    }
+                    Field.setupField(FieldSizeChooser.X*100, FieldSizeChooser.Y*100, 5);
+                    timer1.Enabled = true;
+
+                    dronesLb.DataSource = Field.getDrones();
+                } else
+                {
+                    MessageBox.Show("Field size invalid.", "Error");
+                    Close();
                 }
-
-                if (cellSize == 80) { rectSize = 60; offSet = 10; }
-                if (cellSize == 40) { rectSize = 30; offSet = 5; }
-                if (cellSize == 20) { rectSize = 16; offSet = 2; }
-                if (cellSize == 10) { rectSize = 7; offSet = 2; }
-
-                fieldPnl.Width = cellSize * FieldSizeChooser.X;
-                fieldPnl.Height = cellSize * FieldSizeChooser.Y;
-                fieldPnl.Width++;
-                fieldPnl.Height++;
-
-                Field.setupField(FieldSizeChooser.X, FieldSizeChooser.Y, 5);
-                timer1.Enabled = true;
-
-                dronesLb.DataSource = Field.getDrones();
             }
             else
             {
@@ -61,14 +70,9 @@ namespace Drone_Wars
 
         private void addDroneBtn_Click(object sender, EventArgs e)
         {
-            if (!Field.isOccupied(new Position(0, 0, 0)))
+            if (!Field.isOccupied(null, new Position(20, 20, 0, 0)))
             {
-                int ip = getIp();
-                if (ip > 1 && !Field.ipExists(ip))
-                {
-                    Drone drone = Field.newDrone(0, 0, 0, ip);
-                }
-                else MessageBox.Show("Invalid IP", "Error");
+                Field.newDrone(20, 20, 0);
             }
             else MessageBox.Show("Cannot create drone, a drone already occupies starting space.", "Error");
         }
@@ -103,36 +107,6 @@ namespace Drone_Wars
             }
         }
 
-        private void forwardBtn_Click(object sender, EventArgs e)
-        {
-            moveDrone("forward");
-        }
-
-        private void backwardsBtn_Click(object sender, EventArgs e)
-        {
-            moveDrone("backward");
-        }
-
-        private void leftBtn_Click(object sender, EventArgs e)
-        {
-            moveDrone("left");
-        }
-
-        private void rightBtn_Click(object sender, EventArgs e)
-        {
-            moveDrone("right");
-        }
-
-        private void upBtn_Click(object sender, EventArgs e)
-        {
-            moveDrone("up");
-        }
-
-        private void downBtn_Click(object sender, EventArgs e)
-        {
-            moveDrone("down");
-        }
-
         private void stopBtn_Click(object sender, EventArgs e)
         {
             try
@@ -145,15 +119,20 @@ namespace Drone_Wars
             }
         }
 
+        private void moveBtn_Click(object sender, EventArgs e)
+        {
+            moveDrone("move");
+        }
+
         private void moveDrone(string direction)
         {
             try
             {
-                if (getNumber() > 0)
+                if (getNumber() > 0 && getTheta() > 0.0 && getTheta() <= 2 * Math.PI)
                 {
-                    getSelectedDrone().command(direction, getNumber());
+                   getSelectedDrone().command(direction, getNumber(), getTheta());
                 }
-                else MessageBox.Show("Please enter a valid movement count.", "Error");
+                else MessageBox.Show("Please enter a valid movement count and angle.", "Error");
             }
             catch (LandedException)
             {
@@ -176,13 +155,8 @@ namespace Drone_Wars
 
         private void fieldPnl_Paint(object sender, PaintEventArgs e)
         {
-            if (cellSize >= 40)
-            {
-                e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
-                e.Graphics.PixelOffsetMode = PixelOffsetMode.None;
-            }
-
-            drawGrid(e);
+            e.Graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+            e.Graphics.PixelOffsetMode = PixelOffsetMode.None;
 
             foreach (Drone drone in Field.getDrones())
             {
@@ -194,52 +168,31 @@ namespace Drone_Wars
                 }
             }
         }
-
-        private void drawGrid(PaintEventArgs e)
-        {
-            Graphics formGraphics = e.Graphics;
-            Pen myPen = new Pen(Color.Black);
-
-            for (int i = 0; i <= fieldPnl.Width / cellSize; i++)
-            {
-                formGraphics.DrawLine(myPen, i * cellSize, 0, i * cellSize, fieldPnl.Height);
-            }
-
-            for (int j = 0; j <= fieldPnl.Height / cellSize; j++)
-            {
-                formGraphics.DrawLine(myPen, 0, j * cellSize, fieldPnl.Width, j * cellSize);
-            }
-
-            myPen.Dispose();
-        }
-
+        
         private void setDroneSquare(Position p, string state, PaintEventArgs e)
         {
+            int rectSize = 20;
+            int circleSize = 40;
+            int offSet = 10;
             Graphics formGraphics = e.Graphics;
 
-            if (state.Equals("landed"))
+            if (p != null)
             {
-                SolidBrush myBrush = new SolidBrush(Color.Black);
-                if (cellSize >= 20)
+                if (state.Equals("landed"))
                 {
-                    formGraphics.DrawImage(Properties.Resources.landed, cellSize * p.getxPos() + offSet, cellSize * p.getyPos() + offSet, rectSize, rectSize);
-                } else formGraphics.FillRectangle(myBrush, new Rectangle(cellSize * p.getxPos() + offSet, cellSize * p.getyPos() + offSet, rectSize, rectSize));
-            }
-            if (state.Equals("flying"))
-            {
-                SolidBrush myBrush = new SolidBrush(Color.Red);
-                if (cellSize >= 20)
+                    formGraphics.DrawEllipse(new Pen(Color.Red), new Rectangle(p.getxPos() - offSet * 2, p.getyPos() - offSet * 2, circleSize, circleSize));
+                    formGraphics.DrawImage(Properties.Resources.landed, p.getxPos() - offSet, p.getyPos() - offSet, rectSize, rectSize);
+                }
+                if (state.Equals("flying"))
                 {
-                    formGraphics.DrawImage(Properties.Resources.flying, cellSize * p.getxPos() + offSet, cellSize * p.getyPos() + offSet, rectSize, rectSize);
-                } else formGraphics.FillRectangle(myBrush, new Rectangle(cellSize * p.getxPos() + offSet, cellSize * p.getyPos() + offSet, rectSize, rectSize));
-            }
-            if (state.Equals("prediction"))
-            {
-                SolidBrush myBrush = new SolidBrush(Color.Gray);
-                if (cellSize >= 20)
+                    formGraphics.DrawEllipse(new Pen(Color.Red), new Rectangle(p.getxPos() - offSet * 2, p.getyPos() - offSet * 2, circleSize, circleSize));
+                    formGraphics.DrawImage(Properties.Resources.flying, p.getxPos() - offSet, p.getyPos() - offSet, rectSize, rectSize);
+                }
+                if (state.Equals("prediction"))
                 {
-                    formGraphics.DrawImage(Properties.Resources.prediction, cellSize * p.getxPos() + offSet, cellSize * p.getyPos() + offSet, rectSize, rectSize);
-                } else formGraphics.FillRectangle(myBrush, new Rectangle(cellSize * p.getxPos() + offSet, cellSize * p.getyPos() + offSet, rectSize, rectSize));
+                    formGraphics.DrawEllipse(new Pen(Color.Gray), new Rectangle(p.getxPos() - offSet * 2, p.getyPos() - offSet * 2, circleSize, circleSize));
+                    formGraphics.DrawImage(Properties.Resources.prediction, p.getxPos() - offSet, p.getyPos() - offSet, rectSize, rectSize);
+                }
             }
         }
 
@@ -252,37 +205,32 @@ namespace Drone_Wars
         {
             try
             {
-                if (Int32.Parse(numberTb.Text) > 0)
-                {
-                    return Int32.Parse(numberTb.Text);
-                } else
-                {
-                    MessageBox.Show("Please enter a number greater than 0", "Error");
-                    return 0;
-                }
+                return Int32.Parse(numberTb.Text);
             } catch (FormatException)
             {
                 return 0;
             }
         }
 
-        private int getIp()
+        private double getTheta()
         {
-            int ip;
             try
             {
-                ip = Int32.Parse(ipTb.Text.Split('.')[3].Trim());
+                return Double.Parse(thetaTb.Text) * Math.PI;
             } catch (FormatException)
             {
-                ip = 0;
+                return 0;
             }
-            ipTb.Text = "192.168.1.";
-            return ip;
         }
 
         private void noDroneError()
         {
             MessageBox.Show("Please select a drone.", "Error");
+        }
+
+        private void DroneController_FormClosed(Object sender, FormClosedEventArgs e)
+        {
+           Network.closeServer();
         }
     }
 }

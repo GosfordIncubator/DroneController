@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using DroneControl;
 using System.Net;
 using System.Collections.Generic;
-using System.Text;
+using System.IO;
 
 namespace Drone_Wars.Model
 {
@@ -12,86 +12,53 @@ namespace Drone_Wars.Model
     {
         static NetworkStream stream = default(NetworkStream);
         static List<LiteDrone> drones = new List<LiteDrone>();
+        static List<PhoneListener> listeners = new List<PhoneListener>();
 
-        private static void sendMessage(int message, int id, int ip)
+        static TcpClient server;
+        static TcpClient phones;
+        static Task taskOpenEndpoint;
+
+        private static void sendMessage(int id, int message, int x, int y, int z)
         { 
-            byte[] outStream = new byte[3];
-            outStream[0] = (byte)message;
-            outStream[1] = (byte)id;
-            outStream[2] = (byte)ip;
+            byte[] outStream = new byte[5];
+            outStream[0] = (byte)id;
+            outStream[1] = (byte)message;
+            outStream[2] = (byte)x;
+            outStream[3] = (byte)y;
+            outStream[4] = (byte)z;
             stream.Write(outStream, 0, outStream.Length);
             stream.Flush();
         }
 
         public static void sendTakeOff(int id)
         {
-            sendMessage(1, id, 0);
+            sendMessage(id, 3, 0, 0, 0);
         }
 
         public static void sendLand(int id)
         {
-            sendMessage(2, id, 0);
+            sendMessage(id, 4, 0, 0, 0);
         }
 
         public static void sendStop(int id)
         {
-            sendMessage(3, id, 0);
+            sendMessage(id, 6, 0, 0, 0);
         }
 
-        public static void sendStopX(int id)
+        public static void moveTo(int id, Position p)
         {
-            sendMessage(31, id, 0);
+            sendMessage(id, 5, p.getxPos(), p.getyPos(), p.getzPos());                            
         }
 
-        public static void sendStopY(int id)
+        public static void sendNewDrone(int id)
         {
-            sendMessage(32, id, 0);
-        }
-        
-        public static void sendStopZ(int id)
-        {
-            sendMessage(33, id, 0);
-        }
-
-        public static void sendForward(int id)
-        {
-            sendMessage(4, id, 0);
-        }
-
-        public static void sendBackward(int id)
-        {
-            sendMessage(5, id, 0);
-        }
-
-        public static void sendLeft(int id)
-        {
-            sendMessage(6, id, 0);
-        }
-
-        public static void sendRight(int id)
-        {
-            sendMessage(7, id, 0);
-        }
-
-        public static void sendUp(int id)
-        {
-            sendMessage(8, id, 0);
-        }
-
-        public static void sendDown(int id)
-        {
-            sendMessage(9, id, 0);
-        }
-
-        public static void sendNewDrone(int id, int ip)
-        {
-            sendMessage(10, id, ip);
+            sendMessage(id, 1, 0, 0, 0);
         }
 
         public static Position getDronePos(int id)
         {
             LiteDrone drone = getDrone(id);
-            return new Position(drone.getXPos(),drone.getYPos(),drone.getZPos());
+            return new Position(drone.getXPos(), drone.getYPos(), drone.getZPos(), drone.getOrientation());
         }
 
         private static LiteDrone getDrone(int id)
@@ -106,146 +73,157 @@ namespace Drone_Wars.Model
             throw new NullReferenceException();
         }
 
-        private static void setDrone(int id, int x, int y, int z)
+        private static void setDrone(int id, int x, int y, int z, double o)
         {
-            bool found = false;
-            foreach (LiteDrone drone in drones)
+            try
             {
-                if (drone.getId() == id)
-                {
-                    drone.setXPos(x);
-                    drone.setYPos(y);
-                    drone.setZPos(z);
-                    found = true;
-                }
-            }
-            if (!found)
+                LiteDrone d = getDrone(id);
+                d.setXPos(x);
+                d.setYPos(y);
+                d.setZPos(z);
+                d.setOrientation(o);
+            } catch (NullReferenceException)
             {
-                drones.Add(new LiteDrone(id, x, y, z, null));
+                drones.Add(new LiteDrone(id, x, y, z, o));
             }
         }
 
-        public static void connect()
+        public static void connectServer()
         {
-            TcpClient tcp = new TcpClient();
-            tcp.Connect("localhost", 8000);
-            stream = tcp.GetStream();
+            bool active = true;
+            server = new TcpClient();
+            server.Connect("localhost", 8000);
+            stream = server.GetStream();
 
-            sendMessage(0,0,0);
+            sendMessage(0,0,0,0,0);
 
-            Task taskOpenEndpoint = Task.Factory.StartNew(() =>
+            taskOpenEndpoint = Task.Factory.StartNew(() =>
             {
-                while (true)
+                while (active)
                 {
-                    stream = tcp.GetStream();
-                    byte[] message = new byte[4];
-
-                    try
+                    try {
+                        stream = server.GetStream();
+                        byte[] message = new byte[5];
+                        stream.Read(message, 0, message.Length);
+                        Console.WriteLine("Node received");
+                        setDrone(message[0], message[1], message[2], message[3], message[4]);
+                    } catch (ObjectDisposedException)
                     {
-                        stream.Read(message, 0, 4);
-                    }
-                    catch
+                        active = false;
+                    } catch (IOException)
                     {
-                        Console.WriteLine("Network error");
+                        active = false;
                     }
-                    
-                    setDrone(message[0], message[1], message[2], message[3]);
                 }
             });
         }
 
-        public static Movement getMovement(int id)
+        public static void closeServer()
         {
-            return getDrone(id).getM();
+            server.Close();
+            phones.Close();
         }
 
-        public static void setMovement(int id, Movement m)
+        public static void connectPhones()
         {
-            getDrone(id).setM(m);
-        }
-
-        public static void connect2()
-        {
-            TcpClient phones;
+            
             Task taskOpenEndpoint = Task.Factory.StartNew(() =>
             {
-                TcpListener l = new TcpListener(IPAddress.Any, 8001);
+                int port = 1;
+                TcpListener l = new TcpListener(IPAddress.Any, 8500);
                 l.Start();
-
-                byte[] message = new byte[2];
 
                 while (true)
                 {
                     Console.WriteLine("Waiting for a phone connection...");
                     phones = l.AcceptTcpClient();
                     Console.WriteLine("Phone found");
-
                     NetworkStream s = phones.GetStream();
-                    s.Read(message, 0, 2);
 
-                    int id = message[0];
-                    int msg = message[1];
-                    Drone d = Field.getDrone(id);
-
-                    Console.WriteLine(id);
-                    Console.WriteLine(msg);
-
-                    if (msg == 0)
+                    try
                     {
-                        Console.WriteLine("Connected");
-                    }
+                        port++;
+                        Console.WriteLine(port);
+                        int emptyId = Field.getUnconnectedDrone().getId();
 
-                    if (d != null)
+                        byte[] outStream = new byte[2];
+                        outStream[0] = (byte)emptyId;
+                        outStream[1] = (byte)port;
+                        s.Write(outStream, 0, 2);
+                        s.Flush();
+
+                        phones.Close();
+
+                        Field.connectToDrone(emptyId);
+                        listeners.Add(new PhoneListener(port + 8000));
+                    } catch (NullReferenceException)
                     {
-                        if (msg == 1)
-                        {
-                            Console.WriteLine("Drone takeoff");
-                            d.takeOff();
-                        }
-                        if (msg == 2)
-                        {
-                            Console.WriteLine("Drone land");
-                            d.land();
-                        }
-                        if (msg == 3)
-                        {
-                            Console.WriteLine("Drone stop");
-                            d.stop();
-                        }
-                        if (msg == 4)
-                        {
-                            Console.WriteLine("Drone move forward");
-                            d.command("forward", 1);
-                        }
-                        if (msg == 5)
-                        {
-                            Console.WriteLine("Drone move backward");
-                            d.command("backward", 1);
-                        }
-                        if (msg == 6)
-                        {
-                            Console.WriteLine("Drone move left");
-                            d.command("left", 1);
-                        }
-                        if (msg == 7)
-                        {
-                            Console.WriteLine("Drone move right");
-                            d.command("right", 1);
-                        }
-                        if (msg == 8)
-                        {
-                            Console.WriteLine("Drone move up");
-                            d.command("up", 1);
-                        }
-                        if (msg == 9)
-                        {
-                            Console.WriteLine("Drone move down");
-                            d.command("down", 1);
-                        }
+                        Console.WriteLine("Invalid drone");
+                        byte[] msg = new byte[1];
+                        s.Write(msg, 0, msg.Length);
                     }
-                    phones.Close();
                 }
             });
+        }
+
+        public static void command(int id, int msg, double theta, int port)
+        {
+            Drone d = Field.getDrone(id);
+            try
+            {
+                if (d != null)
+                {
+                    switch (msg)
+                    {
+                        case 1:
+                            Console.WriteLine("Drone takeoff");
+                            d.takeOff();
+                            break;
+                        case 2:
+                            Console.WriteLine("Drone land");
+                            d.land();
+                            break;
+                        case 3:
+                            Console.WriteLine("Drone stop");
+                            d.stop();
+                            break;
+                        case 4:
+                            Console.WriteLine("Drone move");
+                            d.command("move", 10, theta);
+                            break;
+                        case 5:
+                            Console.WriteLine("Drone move up");
+                            d.command("up", 1, theta);
+                            break;
+                        case 6:
+                            Console.WriteLine("Drone move down");
+                            d.command("down", 1, theta);
+                            break;
+                        case 7:
+                            Console.WriteLine("Disconnected");
+                            Field.disconnectDrone(id);
+                            PhoneListener l = getPhoneListener(port);
+                            l.setActive(false);
+                            listeners.Remove(l);
+                            break;
+                    }
+                }
+            } catch (LandedException)
+            {
+                Console.WriteLine("Unable to move, drone landed.");
+            } catch (NullReferenceException)
+            {
+                Console.WriteLine("Drone with id " + id + " does not exist.");
+            }
+        }
+
+        private static PhoneListener getPhoneListener(int port)
+        {
+            foreach (PhoneListener listener in listeners)
+            {
+                if (listener.getPort() == port) return listener;
+            }
+            return null;
         }
     }
 }

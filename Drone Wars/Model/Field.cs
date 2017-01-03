@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace DroneControl
@@ -10,6 +11,8 @@ namespace DroneControl
         private static int fieldLengthY;
         private static int maxHeight;
 
+        private static int borderRadius = 20;
+
         private static int droneNumber = 0;
 
         public static void setupField(int x, int y, int z)
@@ -19,40 +22,27 @@ namespace DroneControl
             maxHeight = z;
         }
 
-        public static Drone newDrone(int x, int y, int o, int ip)
+        public static void newDrone(int x, int y, double o)
         {
             droneNumber++;
-            Drone drone = new Drone(droneNumber, x, y, o, fieldLengthX, fieldLengthY, maxHeight, ip);
-            drones.Add(drone);
-            return drone;
-        }
-
-        public static bool ipExists(int ip)
-        {
-            foreach (Drone drone in drones)
-            {
-                if (drone.getIp() == ip) return true;
-            }
-            return false;
+            drones.Add(new Drone(droneNumber, x, y, o));
         }
 
         public static void removeDrone(Drone drone)
-        {
-            drones.Remove(drone);
-        }
-
-        public static void deleteDrone(Drone drone)
         {
             drone.stop();
             drone.land();
             drones.Remove(drone);
         }
 
-        public static bool isOccupied(Position position)
+        public static bool isOccupied(Drone user, Position position)
         {
-            foreach (Drone drone in drones)
+            List<Drone> f = new List<Drone>();
+            f.AddRange(drones);
+            f.Remove(user);
+            foreach (Drone drone in f)
             {
-                if (drone.getPosition().equals(position))
+                if (Math.Pow((drone.getXPos() - position.getxPos()), 2) + Math.Pow((drone.getYPos() - position.getyPos()), 2) <= Math.Pow((2 * borderRadius), 2))
                 {
                     return true;
                 }
@@ -71,7 +61,7 @@ namespace DroneControl
                 {
                     if (p != null)
                     {
-                        if (p.equals(position))
+                        if (Math.Pow((p.getxPos() - position.getxPos()), 2) + Math.Pow((p.getyPos() - position.getyPos()), 2) <= Math.Pow((2 * borderRadius), 2))
                         {
                             return true;
                         }
@@ -79,6 +69,30 @@ namespace DroneControl
                 }
             }
             return false;
+        }
+
+        public static void disconnectDrone(int id)
+        {
+            Drone drone = getDrone(id);
+            drone.setConnected(false);
+            drone.land();
+        } 
+
+        public static Drone getUnconnectedDrone()
+        {
+            foreach (Drone drone in drones)
+            {
+                if (!drone.getConnected())
+                {
+                    return drone;
+                }
+            }
+            return null;
+        }
+
+        public static void connectToDrone(int id)
+        {
+            getDrone(id).setConnected(true);
         }
 
         public static int getFieldLengthX()
@@ -96,6 +110,11 @@ namespace DroneControl
             return maxHeight;
         }
 
+        public static int getBorderRadius()
+        {
+            return borderRadius;
+        }
+
         public static BindingList<Drone> getDrones()
         {
             return drones;
@@ -111,3 +130,4 @@ namespace DroneControl
         }
     }
 }
+

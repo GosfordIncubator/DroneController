@@ -8,12 +8,14 @@ namespace DroneControl
         private int xPos;
         private int yPos;
         private int zPos;
+        private double orientation;
 
-        public Position(int xPos, int yPos, int zPos)
+        public Position(int xPos, int yPos, int zPos, double o)
         {
             this.xPos = xPos;
             this.yPos = yPos;
             this.zPos = zPos;
+            this.orientation = o;
         }
 
         public bool equals(Position position)
@@ -27,30 +29,14 @@ namespace DroneControl
             int x = Field.getFieldLengthX();
             int y = Field.getFieldLengthY();
             int z = Field.getMaxHeight();
-            if (xPos < 0) return false;
-            if (xPos > x-1) return false;
-            if (yPos < 0) return false;
-            if (yPos > y-1) return false;
+            int offset = Field.getBorderRadius();
+            if (xPos < 0 + offset) return false;
+            if (xPos > x - offset) return false;
+            if (yPos < 0 + offset) return false;
+            if (yPos > y - offset) return false;
             if (zPos < 0) return false;
             if (zPos > z) return false;
             return true;
-        }
-
-        public Movement getPath(Position origin)
-        {
-            int xDistance = xPos - origin.getxPos();
-            int yDistance = yPos - origin.getyPos();
-            int zDistance = zPos - origin.getzPos();
-
-            string xDirection = "None";
-            string yDirection = "None";
-            string zDirection = "None";
-
-            if (xDistance > 0) xDirection = "West"; else if (xDistance < 0) xDirection = "East";
-            if (yDistance > 0) yDirection = "North"; else if (yDistance < 0) yDirection = "South";
-            if (zDistance > 0) zDirection = "down"; else if (zDistance < 0) zDirection = "up";
-
-            return new Movement(Math.Abs(xDistance), Math.Abs(yDistance), Math.Abs(zDistance), xDirection,yDirection,zDirection);
         }
 
         public void set(Position position)
@@ -58,6 +44,7 @@ namespace DroneControl
             xPos = position.getxPos();
             yPos = position.getyPos();
             zPos = position.getzPos();
+            orientation = position.getOrientation();
         }
 
         public int getxPos()
@@ -88,6 +75,22 @@ namespace DroneControl
         public void setzPos(int zPos)
         {
             this.zPos = zPos;
+        }
+
+        public double getOrientation()
+        {
+            return orientation;
+        }
+
+        public void setOrientation(double o)
+        {
+            this.orientation = o;
+        }
+
+        override
+        public string ToString()
+        {
+            return "(" + xPos + "," + yPos + ")";
         }
     }
 }

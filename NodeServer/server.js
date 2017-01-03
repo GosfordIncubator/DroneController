@@ -9,74 +9,28 @@ var s = net.Server(function (client) {
     socket = client;
 
     socket.on('data', function (msg_sent) {
-        var msg = msg_sent[0];
-        var id = msg_sent[1];
-        var ip = msg_sent[2];
+        var id = msg_sent[0];
+        var msg = msg_sent[1]
+        var x = msg_sent[2];
+        var y = msg_sent[3];
+        var z = msg_sent[4];
 
-        if (id > 0) console.log("drone " + id);
+        if (id > 0) console.log("Drone " + id);
 
-        if (msg == 0) {
-            console.log('Connected');
-        }
-        if (msg == 1) {
-            console.log('Drone takeoff');
-            sendInfo(id);
-            drones[id].client.takeoff();
-        }
-        if (msg == 2) {
-            console.log('Drone land');
-            drones[id].client.land();
-        }
-        if (msg == 3) {
-            console.log('Drone stop');
-            drones[id].client.stop();
-        }
-        if (msg == 31) {
-            console.log('Drone stop X');
-            drones[id].client.left(0);
-            drones[id].client.right(0);
-        }
-        if (msg == 32) {
-            console.log('Drone stop Y');
-            drones[id].client.front(0);
-            drones[id].client.back(0);
-        }
-        if (msg == 33) {
-            console.log('Drone stop Z');
-            drones[id].client.up(0);
-            drones[id].client.down(0);
-        }
-        if (msg == 4) {
-            console.log('Drone move forward');
-            drones[id].client.front(0.5);
-        }
-        if (msg == 5) {
-            console.log('Drone move backward');
-            drones[id].client.back(0.5);
-        }
-        if (msg == 6) {
-            console.log('Drone move left');
-            drones[id].client.left(0.5);
-        }
-        if (msg == 7) {
-            console.log('Drone move right');
-            drones[id].client.right(0.5);
-        }
-        if (msg == 8) {
-            console.log('Drone move up');
-            drones[id].client.up(0.5);
-        }
-        if (msg == 9) {
-            console.log('Drone move down');
-            drones[id].client.down(0.5);
-        }
-        if (msg == 10) {
-            drones[id] = new Drone(ip, id);
+        switch (msg) {
+            case 0: console.log('Connected'); break;
+            case 1: console.log('New drone'); break;
+            case 2: console.log('Removed drone'); break;
+            case 3: console.log('Take off'); break;
+            case 4: console.log('Land'); break;
+            case 5: console.log('Move to ' + '(' + x + ', ' + y + ', ' + z + ')'); break;
+            case 6: console.log('Stop'); break;
         }
     });
 
     socket.on('end', function () {
-        return;
+        console.log("Ending");
+        process.exit();
     });
 });
 
@@ -92,7 +46,8 @@ function sendInfo(id) {
     socket.write(new Buffer.from(s));
 }
 
-function Drone(ip, id) {
+
+/*function Drone(ip, id) {
     var self = this;
 
     this.client = ar.createClient({'ip' : "192.168.1." + ip});
@@ -160,4 +115,4 @@ function Drone(ip, id) {
             self.client.stop();
         }
     }
-}
+}*/

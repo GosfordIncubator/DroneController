@@ -6,41 +6,29 @@ namespace DroneControl
     class Drone
     {
         private int id;
-        private Position position = new Position(0, 0, 0);
+        private Position position = new Position(0, 0, 0, 0);
         private Position[] futPos = new Position[50];
         private bool landed;
         private string state;
+        private bool connected = false;
 
-        private float inputLag = 0;
+        private int inputLag = 0;
+        private string horizontalAction = "none";
+        private string verticalAction = "none";
+        private int horizontalActionCount = 0;
+        private int verticalActionCount = 0;
+        private double theta = 0;
 
-        private int FieldLengthX;
-        private int FieldLengthY;
-        private int maxHeight;
-        private int orientation;
-        private int ip;
-
-        private string xAction = "None";
-        private string yAction = "None";
-        private string zAction = "None";
-
-        private int xActionCount = 0;
-        private int yActionCount = 0;
-        private int zActionCount = 0;
-
-        public Drone(int id, int xPos, int yPos, int orientation, int FieldLengthX, int FieldLengthY, int maxHeight, int ip)
+        public Drone(int id, int xPos, int yPos, double orientation)
         {
             this.id = id;
             setXPos(xPos);
             setYPos(yPos);
             setZPos(0);
-            this.orientation = orientation;
-            this.FieldLengthX = FieldLengthX;
-            this.FieldLengthY = FieldLengthY;
-            this.maxHeight = maxHeight;
+            setOrientation(orientation);
             landed = true;
             state = "landed";
-            this.ip = ip;
-            Network.sendNewDrone(id, ip);
+            Network.sendNewDrone(id);
         }
         
         public void operate()
@@ -50,152 +38,81 @@ namespace DroneControl
             for (int i = 0; i < futPos.Length; i++)
             {
                 futPos[i] = getFuturePos(i + 1);
+                //Console.WriteLine(futPos[i].getyPos());
             }
 
             if (inputLag == 0)
             {
-                if (yActionCount == 0 && !yAction.Equals("None"))
+                if (horizontalAction.Equals("move") && horizontalActionCount > 0)
                 {
-                    stopY();
-                }
-
-                if (xActionCount == 0 && !xAction.Equals("None"))
-                {
-                    stopX();
-                }
-
-                if (zActionCount == 0 && !zAction.Equals("None"))
-                {
-                    stopZ();
-                }
-
-                if (yActionCount > 0)
-                {
-                    switch (yAction)
+                    if (!isSafe(position, theta + getOrientation()))
                     {
-                        case "forward":
-                            if (!isSafeForward(position))
-                            {
-                                stopY();
-                            }
-                            else position = moveForward(position);
-                            break;
-                        case "backward":
-                            if (!isSafeBackward(position))
-                            {
-                                stopY();
-                            }
-                            else position = moveBackward(position);
-                            break;
+                        stop();
+                    } else
+                    {
+                        position = move(position, theta + getOrientation());
+                        Network.moveTo(id, position);
+                        horizontalActionCount--;
                     }
-                    yActionCount--;
+                }
+                
+                if (verticalAction.Equals("up") && verticalActionCount > 0)
+                {
+                    if (!isSafeUp(position))
+                    {
+                        stop();
+                    } else
+                    {
+                        position = moveUp(position);
+                        Network.moveTo(id, position);
+                        verticalActionCount--;
+                    }
                 }
 
-                if (xActionCount > 0)
+                if (verticalAction.Equals("down") && verticalActionCount > 0)
                 {
-                    switch (xAction)
+                    if (!isSafeDown(position))
                     {
-                        case "left":
-                            if (!isSafeLeft(position))
-                            {
-                                stopX();
-                            }
-                            else position = moveLeft(position);
-                            break;
-                        case "right":
-                            if (!isSafeRight(position))
-                            {
-                                stopX();
-                            }
-                            else position = moveRight(position);
-                            break;
-                    }
-                    xActionCount--;
-                }
-
-                if (zActionCount > 0)
-                {
-                    switch (zAction)
+                        stop();
+                    } else
                     {
-                        case "up":
-                            if (!isSafeUp(position))
-                            {
-                                stopZ();
-                            }
-                            else position = moveUp(position);
-                            break;
-                        case "down":
-                            if (!isSafeDown(position))
-                            {
-                                land();
-                            }
-                            else position = moveDown(position);
-                            break;
+                        position = moveDown(position);
+                        Network.moveTo(id, position);
+                        verticalActionCount--;
                     }
-                    zActionCount--;
                 }
-            }
-            else inputLag--;
+            } else inputLag--;
         }
 
-        public void command(string action, int actionCount)
+        public void command(string action, int actionCount, double theta)
         {
             if (!landed)
             {
                 switch(action)
                 {
-                    case "forward":
-                        if (isSafeForward(position))
+                    case "move":
+                        if (isSafe(position, theta))
                         {
                             if (inputLag == 0) inputLag++;
-                            Network.sendForward(id);
-                            yAction = action;
-                            yActionCount = actionCount;
-                        }
-                        break;
-                    case "backward":
-                        if (isSafeBackward(position))
-                        {
-                            if (inputLag == 0) inputLag++;
-                            Network.sendBackward(id);
-                            yAction = action;
-                            yActionCount = actionCount;
-                        }
-                        break;
-                    case "left":
-                        if (isSafeLeft(position))
-                        {
-                            if (inputLag == 0) inputLag++;
-                            Network.sendLeft(id);
-                            xAction = action;
-                            xActionCount = actionCount;
-                        }
-                        break;
-                    case "right":
-                        if (isSafeRight(position))
-                        {
-                            if (inputLag == 0) inputLag++;
-                            Network.sendRight(id);
-                            xAction = action;
-                            xActionCount = actionCount;
+                            horizontalAction = action;
+                            horizontalActionCount = actionCount;
+                            this.theta = theta;
                         }
                         break;
                     case "up":
                         if (isSafeUp(position))
                         {
                             if (inputLag == 0) inputLag++;
-                            Network.sendUp(id);
-                            zAction = action;
-                            zActionCount = actionCount;
+                            verticalAction = action;
+                            verticalActionCount = actionCount;
                         }
                         break;
                     case "down":
                         if (isSafeDown(position))
                         {
                             if (inputLag == 0) inputLag++;
-                            Network.sendDown(id);
-                            zAction = action;
-                            zActionCount = actionCount;
+                            verticalAction = action;
+                            verticalActionCount = actionCount;
                         }
                         else
                         {
@@ -205,25 +122,6 @@ namespace DroneControl
                 }
             }
             else throw new LandedException();
-        }
-
-        public void cardinalCommand(string action, int actionCount)
-        {
-            switch (action)
-            {
-                case "North":
-                    moveNorth(actionCount);
-                    break;
-                case "South":
-                    moveSouth(actionCount);
-                    break;
-                case "West":
-                    moveWest(actionCount);
-                    break;
-                case "East":
-                    moveEast(actionCount);
-                    break;
-            }
         }
 
         public void takeOff()
@@ -252,699 +150,173 @@ namespace DroneControl
         public void stop()
         {
             Network.sendStop(id);
-            xAction = "None";
-            xActionCount = 0;
-            yAction = "None";
-            yActionCount = 0;
-            zAction = "None";
-            zActionCount = 0;
+            horizontalAction = "none";
+            horizontalActionCount = 0;
+            verticalAction = "none";
+            verticalActionCount = 0;
         }
 
-        private void stopX()
-        {
-            Network.sendStopX(id);
-            xAction = "None";
-            xActionCount = 0;
-        }
+        private int increment = 25;
+        private int heightIncrement = 0;
 
-        private void stopY()
+        private Position move(Position position, double theta)
         {
-            Network.sendStopY(id);
-            yAction = "None";
-            yActionCount = 0;
-        }
+            double PI = Math.PI;
+            double x;
+            double y;
 
-        private void stopZ()
-        {
-            Network.sendStopZ(id);
-            zAction = "None";
-            zActionCount = 0;
-        }
+            if (theta == 0) theta = 2 * PI;
 
-        private Position moveForward(Position position)
-        {
-            switch (orientation)
+            if (theta > Math.PI*1.5)
             {
-                //Facing North
-                case 0:
-                    //North
-                    return new Position(position.getxPos(), position.getyPos() - 1, position.getzPos());
-                //Facing North-East
-                case 1:
-                    //North-East
-                    return new Position(position.getxPos() + 1, position.getyPos() - 1, position.getzPos());
-                //Facing East
-                case 2:
-                    //East
-                    return new Position(position.getxPos() + 1, position.getyPos(), position.getzPos());
-                //Facing South-East
-                case 3:
-                    //South-East
-                    return new Position(position.getxPos() + 1, position.getyPos() + 1, position.getzPos());
-                //Facing South
-                case 4:
-                    //South
-                    return new Position(position.getxPos(), position.getyPos() + 1, position.getzPos());
-                //Facing South-West
-                case 5:
-                    //South-West
-                    return new Position(position.getxPos() - 1, position.getyPos() + 1, position.getzPos());
-                //Facing West
-                case 6:
-                    //West
-                    return new Position(position.getxPos() - 1, position.getyPos(), position.getzPos());
-                //Facing North-West
-                case 7:
-                    //North-West
-                    return new Position(position.getxPos() - 1, position.getyPos() - 1, position.getzPos());
-            }
-            return position;
-        }
-
-        private Position moveBackward(Position position)
-        {
-            switch (orientation)
+                x = increment * Math.Sin(2 * PI - theta);
+                y = increment * Math.Cos(2 * PI - theta);
+                return new Position(position.getxPos() - (int)x, position.getyPos() - (int)y, position.getzPos(), position.getOrientation());
+            } else if (theta > Math.PI)
             {
-                //Facing North
-                case 0:
-                    //South
-                    return new Position(position.getxPos(), position.getyPos() + 1, position.getzPos());
-                //Facing North-East
-                case 1:
-                    //South-West
-                    return new Position(position.getxPos() - 1, position.getyPos() + 1, position.getzPos());
-                //Facing East
-                case 2:
-                    //West
-                    return new Position(position.getxPos() - 1, position.getyPos(), position.getzPos());
-                //Facing South-East
-                case 3:
-                    //North-West
-                    return new Position(position.getxPos() - 1, position.getyPos() - 1, position.getzPos());
-                //Facing South
-                case 4:
-                    //North
-                    return new Position(position.getxPos(), position.getyPos() - 1, position.getzPos());
-                //Facing South-West
-                case 5:
-                    //North-East
-                    return new Position(position.getxPos() + 1, position.getyPos() - 1, position.getzPos());
-                //Facing West
-                case 6:
-                    //East
-                    return new Position(position.getxPos() + 1, position.getyPos(), position.getzPos());
-                //Facing North-West
-                case 7:
-                    //South-East
-                    return new Position(position.getxPos() + 1, position.getyPos() + 1, position.getzPos());
-            }
-            return position;
-        }
-
-        private Position moveLeft(Position position)
-        {
-            switch (orientation)
+                x = increment * Math.Sin(theta - PI);
+                y = increment * Math.Cos(theta - PI);
+                return new Position(position.getxPos() - (int)x, position.getyPos() + (int)y, position.getzPos(), position.getOrientation());
+            } else if (theta > Math.PI*0.5)
             {
-                //Facing North
-                case 0:
-                    //West
-                    return new Position(position.getxPos() - 1, position.getyPos(), position.getzPos());
-                //Facing North-East
-                case 1:
-                    //North-West
-                    return new Position(position.getxPos() - 1, position.getyPos() - 1, position.getzPos());
-                //Facing East
-                case 2:
-                    //North
-                    return new Position(position.getxPos(), position.getyPos() - 1, position.getzPos());
-                //Facing South-East
-                case 3:
-                    //North-East
-                    return new Position(position.getxPos() + 1, position.getyPos() - 1, position.getzPos());
-                //Facing South
-                case 4:
-                    //East
-                    return new Position(position.getxPos() + 1, position.getyPos(), position.getzPos());
-                //Facing South-West
-                case 5:
-                    //South-East
-                    return new Position(position.getxPos() + 1, position.getyPos() + 1, position.getzPos());
-                //Facing West
-                case 6:
-                    //South
-                    return new Position(position.getxPos(), position.getyPos() + 1, position.getzPos());
-                //Facing North-West
-                case 7:
-                    //South-West
-                    return new Position(position.getxPos() - 1, position.getyPos() + 1, position.getzPos());
-            }
-            return position;
-        }
-
-        private Position moveRight(Position position)
-        {
-            switch (orientation)
+                x = increment * Math.Sin(PI - theta);
+                y = increment * Math.Cos(PI - theta);
+                return new Position(position.getxPos() + (int)x, position.getyPos() + (int)y, position.getzPos(), position.getOrientation());
+            } else if (theta > 0)
             {
-                //Facing North
-                case 0:
-                    //East
-                    return new Position(position.getxPos() + 1, position.getyPos(), position.getzPos());
-                //Facing North-East
-                case 1:
-                    //South-East
-                    return new Position(position.getxPos() + 1, position.getyPos() + 1, position.getzPos());
-                //Facing East
-                case 2:
-                    //South
-                    return new Position(position.getxPos(), position.getyPos() + 1, position.getzPos());
-                //Facing South-East
-                case 3:
-                    //South-West
-                    return new Position(position.getxPos() - 1, position.getyPos() + 1, position.getzPos());
-                //Facing South
-                case 4:
-                    //West
-                    return new Position(position.getxPos() - 1, position.getyPos(), position.getzPos());
-                //Facing South-West
-                case 5:
-                    //North-West
-                    return new Position(position.getxPos() - 1, position.getyPos() - 1, position.getzPos());
-                //Facing West
-                case 6:
-                    //North
-                    return new Position(position.getxPos(), position.getyPos() - 1, position.getzPos());
-                //Facing North-West
-                case 7:
-                    //North-East
-                    return new Position(position.getxPos() + 1, position.getyPos() - 1, position.getzPos());
+                x = increment * Math.Sin(theta);
+                y = increment * Math.Cos(theta);
+                return new Position(position.getxPos() + (int)x, position.getyPos() - (int)y, position.getzPos(), position.getOrientation());
             }
-            return position;
+            throw new NullReferenceException();
         }
 
         private Position moveUp(Position position)
         {
-            return new Position(position.getxPos(), position.getyPos(), position.getzPos() + 1);
+            return new Position(getXPos(), getYPos(), getZPos() + heightIncrement, getOrientation());
         }
 
         private Position moveDown(Position position)
         {
-            return new Position(position.getxPos(), position.getyPos(), position.getzPos() - 1);
-        }
-
-        private void moveNorth(int actionCount)
-        {
-            switch (orientation)
+            Position p = new Position(getXPos(), getYPos(), getZPos() - heightIncrement, getOrientation());
+            if (p.getzPos() < 10)
             {
-                //Facing North
-                case 0:
-                    command("forward",actionCount);
-                    break;
-                //Facing North-East
-                case 1:
-                    rotateTo(0);
-                    command("forward", actionCount);
-                    break;
-                //Facing East
-                case 2:
-                    command("left", actionCount);
-                    break;
-                //Facing South-East
-                case 3:
-                    rotateTo(2);
-                    command("left", actionCount);
-                    break;
-                //Facing South
-                case 4:
-                    command("backward", actionCount);
-                    break;
-                //Facing South-West
-                case 5:
-                    rotateTo(4);
-                    command("backward", actionCount);
-                    break;
-                //Facing West
-                case 6:
-                    command("right", actionCount);
-                    break;
-                //Facing North-West
-                case 7:
-                    rotateTo(6);
-                    command("right", actionCount);
-                    break;
-            }
+                land();
+                return null;
+            } else return p;
         }
 
-        private void moveSouth(int actionCount)
+        private bool isSafe(Position position, double theta)
         {
-            switch (orientation)
-            {
-                //Facing North
-                case 0:
-                    command("backward", actionCount);
-                    break;
-                //Facing North-East
-                case 1:
-                    rotateTo(0);
-                    command("backward", actionCount);
-                    break;
-                //Facing East
-                case 2:
-                    command("right", actionCount);
-                    break;
-                //Facing South-East
-                case 3:
-                    rotateTo(2);
-                    command("right", actionCount);
-                    break;
-                //Facing South
-                case 4:
-                    command("forward", actionCount);
-                    break;
-                //Facing South-West
-                case 5:
-                    rotateTo(4);
-                    command("forward", actionCount);
-                    break;
-                //Facing West
-                case 6:
-                    command("left", actionCount);
-                    break;
-                //Facing North-West
-                case 7:
-                    rotateTo(6);
-                    command("left", actionCount);
-                    break;
-            }
-        }
+            double PI = Math.PI;
+            double x;
+            double y;
 
-        private void moveEast(int actionCount)
-        {
-            switch (orientation)
+            if (theta > Math.PI * 1.5)
             {
-                //Facing North
-                case 0:
-                    command("right", actionCount);
-                    break;
-                //Facing North-East
-                case 1:
-                    rotateTo(0);
-                    command("right", actionCount);
-                    break;
-                //Facing East
-                case 2:
-                    command("forward", actionCount);
-                    break;
-                //Facing South-East
-                case 3:
-                    rotateTo(2);
-                    command("forward", actionCount);
-                    break;
-                //Facing South
-                case 4:
-                    command("left", actionCount);
-                    break;
-                //Facing South-West
-                case 5:
-                    rotateTo(4);
-                    command("left", actionCount);
-                    break;
-                //Facing West
-                case 6:
-                    command("backward", actionCount);
-                    break;
-                //Facing North-West
-                case 7:
-                    rotateTo(6);
-                    command("backward", actionCount);
-                    break;
-            }
-        }
-
-        private void moveWest(int actionCount)
-        {
-            switch (orientation)
+                x = increment * Math.Sin(2 * PI - theta);
+                y = increment * Math.Cos(2 * PI - theta);
+                Position p = new Position(getXPos() - (int)x, getYPos() - (int)y, getZPos(), getOrientation());
+                return !Field.isOccupied(this, p) && p.isInside() && !Field.crossesPath(this, p);
+            } else if (theta > Math.PI)
             {
-                //Facing North
-                case 0:
-                    command("left", actionCount);
-                    break;
-                //Facing North-East
-                case 1:
-                    rotateTo(0);
-                    command("left", actionCount);
-                    break;
-                //Facing East
-                case 2:
-                    command("backward", actionCount);
-                    break;
-                //Facing South-East
-                case 3:
-                    rotateTo(2);
-                    command("backward", actionCount);
-                    break;
-                //Facing South
-                case 4:
-                    command("right", actionCount);
-                    break;
-                //Facing South-West
-                case 5:
-                    rotateTo(4);
-                    command("right", actionCount);
-                    break;
-                //Facing West
-                case 6:
-                    command("forward", actionCount);
-                    break;
-                //Facing North-West
-                case 7:
-                    rotateTo(6);
-                    command("forward", actionCount);
-                    break;
-            }
-        }
-
-        private bool isSafeForward(Position position)
-        {
-            Position p;
-            switch (orientation)
+                x = increment * Math.Sin(theta - PI);
+                y = increment * Math.Cos(theta - PI);
+                Position p = new Position(getXPos() - (int)x, getYPos() + (int)y, getZPos(), getOrientation());
+                return !Field.isOccupied(this, p) && p.isInside() && !Field.crossesPath(this, p);
+            } else if (theta > Math.PI * 0.5)
             {
-                //Facing North
-                case 0:
-                    //North
-                    p = new Position(position.getxPos(), position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this,p);
-                //Facing North-East
-                case 1:
-                    //North-East
-                    p = new Position(position.getxPos() + 1, position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing East
-                case 2:
-                    //East
-                    p = new Position(position.getxPos() + 1, position.getyPos(), position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing South-East
-                case 3:
-                    //South-East
-                    p = new Position(position.getxPos() + 1, position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing South
-                case 4:
-                    //South
-                    p = new Position(position.getxPos(), position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing South-West
-                case 5:
-                    //South-West
-                    p = new Position(position.getxPos() - 1, position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing West
-                case 6:
-                    //West
-                    p = new Position(position.getxPos() - 1, position.getyPos(), position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing North-West
-                case 7:
-                    //North-West
-                    p = new Position(position.getxPos() - 1, position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-            }
-            return false;
-        }
-
-        private bool isSafeBackward(Position position)
-        {
-            Position p;
-            switch (orientation)
+                x = increment * Math.Sin(PI - theta);
+                y = increment * Math.Cos(PI - theta);
+                Position p = new Position(getXPos() + (int)x, getYPos() + (int)y, getZPos(), getOrientation());
+                return !Field.isOccupied(this, p) && p.isInside() && !Field.crossesPath(this, p);
+            } else if (theta > 0)
             {
-                //Facing North
-                case 0:
-                    //South
-                    p = new Position(position.getxPos(), position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing North-East
-                case 1:
-                    //South-West
-                    p = new Position(position.getxPos() - 1, position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing East
-                case 2:
-                    //West
-                    p = new Position(position.getxPos() - 1, position.getyPos(), position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing South-East
-                case 3:
-                    //North-West
-                    p = new Position(position.getxPos() - 1, position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing South
-                case 4:
-                    //North
-                    p = new Position(position.getxPos(), position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing South-West
-                case 5:
-                    //North-East
-                    p = new Position(position.getxPos() + 1, position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing West
-                case 6:
-                    //East
-                    p = new Position(position.getxPos() + 1, position.getyPos(), position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing North-West
-                case 7:
-                    //South-East
-                    p = new Position(position.getxPos() + 1, position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
+                x = increment * Math.Sin(theta);
+                y = increment * Math.Cos(theta);
+                Position p = new Position(getXPos() + (int)x, getYPos() - (int)y, getZPos(), getOrientation());
+                return !Field.isOccupied(this, p) && p.isInside() && !Field.crossesPath(this, p);
             }
-            return false;
+            throw new NullReferenceException();
         }
-
-        private bool isSafeLeft(Position position)
-        {
-            Position p;
-            switch(orientation)
-            {
-                //Facing North
-                case 0:
-                    //West
-                    p = new Position(position.getxPos() - 1, position.getyPos(), position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing North-East
-                case 1:
-                    //North-West
-                    p = new Position(position.getxPos() - 1, position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing East
-                case 2:
-                    //North
-                    p = new Position(position.getxPos(), position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing South-East
-                case 3:
-                    //North-East
-                    p = new Position(position.getxPos() + 1, position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing South
-                case 4:
-                    //East
-                    p = new Position(position.getxPos() + 1, position.getyPos(), position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing South-West
-                case 5:
-                    //South-East
-                    p = new Position(position.getxPos() + 1, position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing West
-                case 6:
-                    //South
-                    p = new Position(position.getxPos(), position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing North-West
-                case 7:
-                    //South-West
-                    p = new Position(position.getxPos() - 1, position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-            }
-            return false;
-        }
-
-        private bool isSafeRight(Position position)
-        {
-            Position p;
-            switch (orientation)
-            {
-                //Facing North
-                case 0:
-                    //East
-                    p = new Position(position.getxPos() + 1, position.getyPos(), position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing North-East
-                case 1:
-                    //South-East
-                    p = new Position(position.getxPos() + 1, position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing East
-                case 2:
-                    //South
-                    p = new Position(position.getxPos(), position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing South-East
-                case 3:
-                    //South-West
-                    p = new Position(position.getxPos() - 1, position.getyPos() + 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing South
-                case 4:
-                    //West
-                    p = new Position(position.getxPos() - 1, position.getyPos(), position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing South-West
-                case 5:
-                    //North-West
-                    p = new Position(position.getxPos() - 1, position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing West
-                case 6:
-                    //North
-                    p = new Position(position.getxPos(), position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-                //Facing North-West
-                case 7:
-                    //North-East
-                    p = new Position(position.getxPos() + 1, position.getyPos() - 1, position.getzPos());
-                    return !Field.isOccupied(p) && p.isInside() && !Field.crossesPath(this, p);
-            }
-            return false;
-        }
-
+        
         private bool isSafeUp(Position position)
         {
-            return position.getzPos() + 1 < maxHeight;
+            Position p = new Position(getXPos(), getYPos(), getZPos() + heightIncrement, getOrientation());
+            return p.isInside();
         }
 
         private bool isSafeDown(Position position)
         {
-            return position.getzPos() - 1 > 0;
+            Position p = new Position(getXPos(), getYPos(), getZPos() - heightIncrement, getOrientation());
+            return p.isInside();
         }
 
         private Position getFuturePos(int i)
         {
-            Position position = new Position(0,0,0);
-            position.set(this.position); ;
+            string tempHorizontalAction = horizontalAction;
+            int tempHorizontalActionCount = horizontalActionCount;
+            string tempVerticalAction = verticalAction;
+            int tempVerticalActionCount = verticalActionCount;
+            double tempTheta = theta;
+            double tempOrientation = getOrientation();
 
-            string tempYAction = yAction;
-            string tempXAction = xAction;
-            string tempZAction = zAction;
+            Position tempPosition = new Position(0,0,0,0);
+            tempPosition.set(position);
 
-            int tempYActionCount = yActionCount;
-            int tempXActionCount = xActionCount;
-            int tempZActionCount = zActionCount;
-
-            for (int k = 0; k < i; k++)
+            for (int j = 0; j < i; j++)
             {
-                if (tempYActionCount == 0 && !tempYAction.Equals("None"))
+                if (tempHorizontalAction.Equals("move") && tempHorizontalActionCount > 0)
                 {
-                    tempYAction = "None";
-                    tempYActionCount = 0;
-                }
-
-                if (tempXActionCount == 0 && !tempXAction.Equals("None"))
-                {
-                    tempXAction = "None";
-                    tempXActionCount = 0;
-                }
-
-                if (tempZActionCount == 0 && !tempZAction.Equals("None"))
-                {
-                    tempZAction = "None";
-                    tempZActionCount = 0;
-                }
-
-                if (tempYActionCount > 0)
-                {
-                    switch (tempYAction)
+                    if (!isSafe(tempPosition, tempTheta + tempOrientation))
                     {
-                        case "forward":
-                            if (!isSafeForward(position))
-                            {
-                                tempYAction = "None";
-                                tempYActionCount = 0;
-                            }
-                            else position = moveForward(position);
-                            break;
-                        case "backward":
-                            if (!isSafeBackward(position))
-                            {
-                                tempYAction = "None";
-                                tempYActionCount = 0;
-                            }
-                            else position = moveBackward(position);
-                            break;
+                        tempHorizontalAction = "none";
+                        tempHorizontalActionCount = 0;
+                        tempVerticalAction = "none";
+                        tempVerticalActionCount = 0;
+                    } else
+                    {
+                        tempPosition = move(tempPosition, tempTheta + tempOrientation);
+                        tempHorizontalActionCount--;
                     }
-                    tempYActionCount--;
                 }
 
-                if (tempXActionCount > 0)
+                if (tempVerticalAction.Equals("up") && tempVerticalActionCount > 0)
                 {
-                    switch (tempXAction)
+                    if (!isSafeUp(tempPosition))
                     {
-                        case "left":
-                            if (!isSafeLeft(position))
-                            {
-                                tempXAction = "None";
-                                tempXActionCount = 0;
-                            }
-                            else position = moveLeft(position);
-                            break;
-                        case "right":
-                            if (!isSafeRight(position))
-                            {
-                                tempXAction = "None";
-                                tempXActionCount = 0;
-                            }
-                            else position = moveRight(position);
-                            break;
+                        tempHorizontalAction = "none";
+                        tempHorizontalActionCount = 0;
+                        tempVerticalAction = "none";
+                        tempVerticalActionCount = 0;
+                    } else
+                    {
+                        tempPosition = moveUp(tempPosition);
+                        tempVerticalActionCount--;
                     }
-                    tempXActionCount--;
                 }
 
-                if (tempZActionCount > 0)
+                if (tempVerticalAction.Equals("down") && tempVerticalActionCount > 0)
                 {
-                    switch (tempZAction)
+                    if (!isSafeDown(tempPosition))
                     {
-                        case "up":
-                            if (!isSafeUp(position))
-                            {
-                                tempZAction = "None";
-                                tempZActionCount = 0;
-                            }
-                            else position = moveUp(position);
-                            break;
-                        case "down":
-                            if (!isSafeDown(position))
-                            {
-                                position.setzPos(0);
-                                xAction = "None";
-                                xActionCount = 0;
-                                yAction = "None";
-                                yActionCount = 0;
-                                zAction = "None";
-                                zActionCount = 0;
-                            }
-                            else position = moveDown(position);
-                            break;
+                        tempHorizontalAction = "none";
+                        tempHorizontalActionCount = 0;
+                        tempVerticalAction = "none";
+                        tempVerticalActionCount = 0;
+                    } else
+                    {
+                        tempPosition = moveDown(tempPosition);
+                        tempVerticalActionCount--;
                     }
-                    tempZActionCount--;
                 }
             }
-            return position;
+            return tempPosition;
         }
 
-        private void rotateTo(int o)
+        private void rotateTo(double o)
         {
-            orientation = o;
+            setOrientation(o);
         }
 
         public int getId()
@@ -982,24 +354,19 @@ namespace DroneControl
             position.setzPos(zPos);
         }
 
-        public int getHeight()
-        {
-            return position.getzPos();
-        }
-
-        public void setHeight(int height)
-        {
-            position.setzPos(height);
-        }
-
         public Position getPosition()
         {
             return position;
         }
 
-        public int getOrientation()
+        public double getOrientation()
         {
-            return orientation;
+            return position.getOrientation();
+        }
+
+        public void setOrientation(double o)
+        {
+            position.setOrientation(o);
         }
 
         public string getState()
@@ -1012,19 +379,19 @@ namespace DroneControl
             this.state = state;
         }
 
-        public int getMoves()
+        public bool getConnected()
         {
-            return Math.Max(xActionCount, Math.Max(yActionCount, zActionCount));
+            return connected;
+        }
+
+        public void setConnected(bool connected)
+        {
+            this.connected = connected;
         }
 
         public Position[] getFutPos()
         {
             return futPos;
-        }
-
-        public int getIp()
-        {
-            return ip;
         }
 
         override
