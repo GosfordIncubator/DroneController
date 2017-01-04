@@ -29,7 +29,6 @@ var s = net.Server(function (client) {
     });
 
     socket.on('end', function () {
-        console.log("Ending");
         process.exit();
     });
 });
@@ -45,74 +44,3 @@ function sendInfo(id) {
     s[3] = drones[id].position.z;
     socket.write(new Buffer.from(s));
 }
-
-
-/*function Drone(ip, id) {
-    var self = this;
-
-    this.client = ar.createClient({'ip' : "192.168.1." + ip});
-    this.ip = ip;
-    this.id = id;
-
-    this.parallel = 0;
-    this.transverse = 0;
-    this.lateral = 0;
-    this.vertical = 0;
-
-    this.droneData = new Object();
-    this.deltaTime;
-    this.prevTime;
-    this.curTime = Date.now();
-
-    this.position = {
-        x: 0,
-        y: 0,
-        z: 0
-    }
-
-    this.updateData = function(navData) {
-        //console.log("Receiving data from ", ip);
-        //update drone data
-        self.droneData = navData;
-        //calculate delta
-        self.prevTime = self.curTime;
-        self.curTime = Date.now();
-        self.deltaTime = (self.curTime - self.prevTime) / 1000;
-
-        //update position
-        if (self.droneData.droneState.flying) {
-            var yawRadians = self.droneData.demo.rotation.yaw * 180 / Math.PI;
-            var localX = self.droneData.demo.xVelocity * self.deltaTime;
-            var localY = self.droneData.demo.yVelocity * self.deltaTime;
-            self.position.z = self.droneData.demo.altitude;
-            self.position.x += Math.cos(yawRadians)*localX + Math.sin(yawRadians)*localY;
-            self.position.y += Math.sin(yawRadians)*localX + Math.cos(yawRadians)*localY;
-            // self.position.x += localX;
-            // self.position.y += localY;
-        }
-        sendInfo(self.id);
-    }
-    this.client.on('navdata', this.updateData);
-
-    this.move = function(parallel, transverse, rotational) {
-        if (parallel >= 0) {
-            self.client.front(parallel);
-        } else {
-            self.client.back(-parallel);
-        }
-        if (transverse >= 0) {
-            self.client.right(transverse);
-        } else {
-            self.client.left(-transverse);
-        }
-        if (rotational >= 0) {
-            self.client.clockwise(rotational);
-        } else {
-            self.client.counterClockwise(-rotational)
-        }
-
-        if (parallel == 0 && transverse == 0 && rotational == 0) {
-            self.client.stop();
-        }
-    }
-}*/

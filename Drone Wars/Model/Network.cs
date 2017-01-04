@@ -120,8 +120,14 @@ namespace Drone_Wars.Model
 
         public static void closeServer()
         {
-            server.Close();
-            phones.Close();
+            try
+            {
+                server.Close();
+                phones.Close();
+            } catch (NullReferenceException)
+            {
+                Console.WriteLine("Server not found.");
+            }
         }
 
         public static void connectPhones()

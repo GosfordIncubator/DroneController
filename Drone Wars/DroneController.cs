@@ -46,9 +46,6 @@ namespace Drone_Wars
             {
                 if (FieldSizeChooser.X > 0 && FieldSizeChooser.Y > 0)
                 {
-                    int h = Screen.GetBounds(this).Height;
-                    int w = Screen.GetBounds(this).Width;
-
                     fieldPnl.Width = FieldSizeChooser.X*100;
                     fieldPnl.Height = FieldSizeChooser.Y*100;
 
